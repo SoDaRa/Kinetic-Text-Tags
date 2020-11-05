@@ -439,6 +439,10 @@ init python:
 
     # Demonstration of changing text styles on the fly
     # Could also predefine some styles and swap between those as well!
+    # Also for this effect in particular, I ---HIGHLY--- advise building in some way to disable it
+    # as it can be pretty harsh on the eyes. When I have time I'll create an implementation
+    # that allows for disabling it everywhere. Likely just a preference variable you
+    # can turn off and that the class checks before applying random styles.
     class ChaosText(renpy.Displayable):
         font_list = ["FOT-PopJoyStd-B.otf", "GrenzeGotisch-VariableFont_wght.ttf", "Pacifico-Regular.ttf", "RobotoSlab-ExtraBold.ttf",\
                      "RobotoSlab-Medium.ttf", "SyneTactile-Regular.ttf", "TurretRoad-Bold.ttf", "TurretRoad-ExtraBold.ttf", "TurretRoad-ExtraLight.ttf", \
