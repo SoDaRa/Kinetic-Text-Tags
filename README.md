@@ -17,4 +17,5 @@ To use what I've made or to learn how to create your own, simply include **[kine
 And if you have any questions feel free to inquire. 
 
 I've included some basic examples to help you get your mind humming with what's possible with these. For more thorough documentation, feel free to check the forum post here for an overview of how it works, its limitations and other info.
-(I'll probably add that stuff here later. But it's a lot to go over and I've never made a GitHub README before...)
+I'll probably add that stuff here later. But it's a lot to go over and I've never made a GitHub README before...
+For now you can read more about it in my post on the Lemma Soft Forums https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=60527
