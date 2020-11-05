@@ -470,6 +470,8 @@ init python:
             return [ self.child ]
 
     # Could honestly still use some work. But it's a start and good proof of concept
+    # Credit to the FancyText module creator yukinogatari for the idea.
+    # FancyText module can be found at https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=59587
     class RotateText(renpy.Displayable):
         def __init__(self, child, speed=100, **kwargs):
             super(RotateText, self).__init__(**kwargs)
