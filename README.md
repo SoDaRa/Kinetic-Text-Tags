@@ -8,7 +8,8 @@ Or feeling a line needs a little more OOMPH!! to get the job done?
 
 ![Example Wave](https://github.com/SoDaRa/Kinetic-Text-Tags/blob/main/game/example_gifs/ExampleWaves.gif)
 
-Then look no further! Through the power of Custom Text Tags, you can add any translation, rotation, projectice, or styling you want on the fly!!
+Then look no further! Through the power of Custom Text Tags, you can add any translation, rotation, projection, or styling you want on the fly!!
+You can even change the text and stack multiple effects together.
 You can even have your text react to the mouse a little if you'd like!
 Just add some Kinetic Text Tags to your Ren'py project and you'll be flinging text around the screen like a wizard in no time!
 
