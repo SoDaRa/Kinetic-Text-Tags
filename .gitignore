@@ -9,6 +9,8 @@ game/saves/auto-7-LT1.save
 game/saves/auto-8-LT1.save
 game/saves/auto-9-LT1.save
 game/saves/persistent
+game/saves/
 log.txt
 traceback.txt
 errors.txt
+*.save
