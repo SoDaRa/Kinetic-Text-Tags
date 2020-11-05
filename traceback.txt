@@ -1,0 +1,36 @@
+﻿I'm sorry, but an uncaught exception occurred.
+
+While running game code:
+  File "game/script.rpy", line 34, in script
+    e "I'm having conflicting feelings about this..."
+  File "game/text_tags.rpy", line 749, in move_tag
+    
+TypeError: __init__() takes exactly 2 arguments (3 given)
+
+-- Full Traceback ------------------------------------------------------------
+
+Full traceback:
+  File "game/script.rpy", line 34, in script
+    e "I'm having conflicting feelings about this..."
+  File "C:\Users\SoDaRa\Downloads\Renpy\renpy-7.3.5-sdk\renpy\ast.py", line 708, in execute
+    renpy.exports.say(who, what, *args, **kwargs)
+  File "C:\Users\SoDaRa\Downloads\Renpy\renpy-7.3.5-sdk\renpy\exports.py", line 1345, in say
+    who(what, *args, **kwargs)
+  File "C:\Users\SoDaRa\Downloads\Renpy\renpy-7.3.5-sdk\renpy\character.py", line 1142, in __call__
+    self.do_display(who, what, cb_args=self.cb_args, **display_args)
+  File "C:\Users\SoDaRa\Downloads\Renpy\renpy-7.3.5-sdk\renpy\character.py", line 842, in do_display
+    **display_args)
+  File "C:\Users\SoDaRa\Downloads\Renpy\renpy-7.3.5-sdk\renpy\character.py", line 572, in display_say
+    what_text.update()
+  File "C:\Users\SoDaRa\Downloads\Renpy\renpy-7.3.5-sdk\renpy\text\text.py", line 1697, in update
+    tokens = self.apply_custom_tags(tokens)
+  File "C:\Users\SoDaRa\Downloads\Renpy\renpy-7.3.5-sdk\renpy\text\text.py", line 2244, in apply_custom_tags
+    new_contents = func(tag, value, contents)
+  File "game/text_tags.rpy", line 749, in move_tag
+    
+TypeError: __init__() takes exactly 2 arguments (3 given)
+
+Windows-8-6.2.9200
+Ren'Py 7.3.5.606
+Kinetic Text Tags 1.0
+Wed Nov 04 23:42:46 2020

@@ -1,0 +1,8 @@
+﻿I'm sorry, but errors were detected in your script. Please correct the
+errors listed below, and try again.
+
+
+File "game/kinetic_text_tags.rpy", line 10: indentation mismatch.
+
+Ren'Py Version: Ren'Py 7.3.5.606
+Thu Nov 05 00:21:15 2020
