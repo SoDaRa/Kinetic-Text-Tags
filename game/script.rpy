@@ -28,6 +28,8 @@ label start:
     e "Here is some more selective {fi=13-1.5}fade in{/fi} text"
     e "Here is some {move}{b}moveable sliding{/move} text. Move your mouse near it to see!!"
     e "I'm having conflicting feelings about this..."
+    e "{fi=0-0.5}There still seems to be some bugs. Like if I just keep typing this, this text will continue off the screen and you won't be able to read it.{/fi}"
+    e "{fi=0-0.5}But if we insert a paragraph tag into our line, we'll be able to tell {para}the text displayable to make a new paragraph to avoid the issue! {para}Huzzah!!{/fi}"
     es "I want to {swap=love@hate@1.0}{bt}feel{/bt}{/swap} it."
     e "And I feel something bad is about to {chaos}happen...{/chaos}"
     e "{chaos}Helllllp Mmeeeee!!!{/chaos}"

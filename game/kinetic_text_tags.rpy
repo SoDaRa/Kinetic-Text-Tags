@@ -808,6 +808,13 @@ init python:
                 new_list.append((kind,text))
         return new_list
 
+    # Turns out some text effects won't allow for a paragraph break if applied to a whole line
+    # Which can cause your text to just continue straight off the screen.
+    # To amend this, you can insert the {para} tag.
+    # This will let the Text displayable holding us know when to wrap. 
+    def paragraph_tag(tag, argument):
+        return [(renpy.TEXT_PARAGRAPH, "")]
+
     # This tag is made to automatically wrap several Classes inside one another
     # This is to reduce strain on the render pipeline and memory from nested classes
     # SwapText is not included in this due to it replacing whole sections rather than
@@ -917,4 +924,5 @@ init python:
     config.custom_text_tags["swap"] = swap_tag
     config.custom_text_tags["move"] = move_tag
     config.custom_text_tags["omega"] = omega_tag
+    config.self_closing_custom_text_tags["para"] = paragraph_tag
     #config.custom_text_tags[""] = _tag
