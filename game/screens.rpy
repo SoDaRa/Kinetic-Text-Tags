@@ -309,7 +309,7 @@ screen navigation():
 
             textbutton _("Save") action ShowMenu("save")
     # Example of button not really updating with hover. I'll see if I can fix it later...
-        textbutton _("{bt}{=navigation_button}Load{/bt}") action ShowMenu("load")
+        textbutton _("{bt}Load{/bt}") action ShowMenu("load")
 
         textbutton _("{bt}Preferences{/bt}") action ShowMenu("preferences")
 
@@ -737,9 +737,9 @@ screen preferences():
 
                 vbox:
                     style_prefix "radio"
-                    label _("{bt=5}{=pref_label_text}Rollback{/bt} Side")
+                    label _("{bt=5}Rollback{/bt} Side")
                     textbutton _("Disable") action Preference("rollback side", "disable")
-                    textbutton _("{bt=5}{=radio_button}Left{/bt}") action Preference("rollback side", "left")
+                    textbutton _("{bt=5}Left{/bt}") action Preference("rollback side", "left")
                     textbutton _("Right") action Preference("rollback side", "right")
 
                 vbox:

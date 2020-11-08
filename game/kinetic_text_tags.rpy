@@ -366,6 +366,18 @@ init python:
 
         def visit(self):
             return [ self.child ]
+        # If you are using the modified text.py, then add these lines to any class you
+        # want them to be used on. This will enable the Text holding your Wrapper
+        # class so send its style and style prefix updates down to your wrapper
+        # which can then update its child.
+        """
+        def set_style_prefix(self, prefix, root):
+            super(BounceText, self).set_style_prefix(prefix, root)
+            self.child.set_style_prefix(prefix, root)
+        def set_style(self, style):
+            self.child.set_style(style)
+        """
+
 
     # Simple fade in. Helps show some ideas for timing
     # May want to modify to allow it to skip to the end if the user clicks.
@@ -811,7 +823,7 @@ init python:
     # Turns out some text effects won't allow for a paragraph break if applied to a whole line
     # Which can cause your text to just continue straight off the screen.
     # To amend this, you can insert the {para} tag.
-    # This will let the Text displayable holding us know when to wrap. 
+    # This will let the Text displayable holding us know when to wrap.
     def paragraph_tag(tag, argument):
         return [(renpy.TEXT_PARAGRAPH, "")]
 
