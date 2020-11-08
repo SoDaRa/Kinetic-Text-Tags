@@ -18,7 +18,7 @@ You can even have your text react to the mouse a little if you'd like!
 Just add some Kinetic Text Tags to your Ren'py project and you'll be flinging text around the screen like a wizard in no time!
 
 To use what I've made or to learn how to create your own, simply include **[kinetic_text_tags.rpy](https://github.com/SoDaRa/Kinetic-Text-Tags/blob/main/game/kinetic_text_tags.rpy)** in your project and read over the code and comments for how you can get started and to learn how to create your own.
-Due to some limited functionality with button styling, I have included a patch to renpy that should help enable that functionality. However it is experimental. Details on it will be included below.
+Due to some limited functionality with button styling, I have included a patch to renpy that should help enable that functionality. However it is experimental. Details on it will be in the Advanced section below.
 
 ## How it works
 This modification works by taking the letters within a string of text sent to the tag, and replacing them with custom displayables that is then inserted back into the Text with that string. Our displayable then handles the rendering and placement of the text and can move it around freely and even change its content and styling!
