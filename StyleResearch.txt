@@ -1,0 +1,49 @@
+DisplayableSegment gets only hyperlink, cps, ruby_top and ruby_bottom applied to it.
+DisplayableSegment doesn't render its displayables, it's more just space for them to be put. 
+
+Text.py
+242 TextSegment applies style to glyphs in glyphs using self.variables
+166 & 201 self.variables come from style supplied to the TextSegment is either the init or take_style functions.
+1049 & 1083 take_style is called in segment
+895 Segment is handed a style
+597 Segment is called in Layout's init function
+525 Layout gets the style from the text it is handed
+1996 & 2008 Text gives itself to Layout when it calls it in .render() 
+1461 & 1792 Text gets its style from super (Displayable) class calls init and set_style_prefix
+
+core.py
+319 & 469 Displayable sets style in init and set_style_prefix
+445 * 455 Focus and unfocus Displayable does self.set_style_prefix() by default
+481 Displayable calls self.style.set_prefix in set_style_prefix
+
+behavior.py
+993 TextButton creates a Text with text_style supplied to it ('button_text'). Which is set as the child on the Button it creates
+708 Button takes child in init
+824 & 840 Button calls child.set_transform_event(self.role+"hover/idle") if it has a child
+858 Button changes role to 'selected_'. 
+877 This is applied if that is not its role already or clicked != self.clicked. 
+881 & 884 Button calls set_style_prefix(self.role + 'idle_/insensitive_', True) if it is clicked or not.
+971 Button calls super.set_style_prefix()
+
+layout.py
+Window has no set_style_prefix defined
+116 Container calls super.set_style_prefix()
+119 Container calls .set_style_prefix(prefix, False) for all chilldren
+
+RV is just return value
+tss is text segment stack
+_tts is Text to speech?
+Style is defined in style.pyx
+Text class starts on 1408 in Text/text.py
+Displayable class starts on 254 in display/core.py
+TextButton is defined on 988 in display/behavior.py
+Button is defined on 690 in display/behavior.py
+Window is defined on 1053 in display/layout.py
+Container is defined on 73 in display/layout.py
+
+Text is a subclass of Displayable
+Button is a subclass of Window
+Window is a subclass of Container
+Container is a subclass of Displayable
+
+Focus is defined on 30 in display/focus.py
