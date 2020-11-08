@@ -1703,14 +1703,14 @@ class Text(renpy.display.core.Displayable):
         # self.displayables is the set of displayables used by this
         # Text.
         self.tokens, self.displayables = self.get_displayables(tokens)
-        #######################################################
+        #########################################
         if self.displayables is not None:
-            for i in self.displayables:
+            for i in self.displayables:   
                 style_setter = getattr(i, "set_style", None)
-                if style_setter:
+                if style_setter: # Check to be sure this displayable is one of ours
                     if callable(style_setter):
                         i.set_style(self.style)
-        ########################################################
+        #########################################
         for type, text in self.tokens:
             if type == TAG and text.startswith("a="):
                 self.focusable = True
@@ -1798,10 +1798,12 @@ class Text(renpy.display.core.Displayable):
 
         super(Text, self).set_style_prefix(prefix, root)
         self.dirty = True
-############################################        ################################################
+        ###############################################
         for i in self.displayables:
-            i.set_style_prefix(prefix, False)
-    
+            style_setter = getattr(i, "set_style", None)
+            if style_setter: # Check to be sure this displayable is one of ours
+                if callable(style_setter):
+                    i.set_style_prefix(prefix, None)
     def set_style(self, style):
         self.style = style
         if self.displayables is not None:
@@ -1810,7 +1812,8 @@ class Text(renpy.display.core.Displayable):
                 if style_setter:
                     if callable(style_setter):
                         i.set_style(self.style)
-#####################################################################################################
+        ###############################################
+
     def get_placement(self):
 
         rv = super(Text, self).get_placement()

@@ -378,7 +378,6 @@ init python:
             self.child.set_style(style)
         """
 
-
     # Simple fade in. Helps show some ideas for timing
     # May want to modify to allow it to skip to the end if the user clicks.
     # Otherwise plays for the full time given.

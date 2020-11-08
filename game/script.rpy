@@ -8,7 +8,7 @@ style es_style:
 
 define e = Character("Eileen")
 define es = Character("{swap=Eileen@Lienee@1.0}{=es_style}Eileen{/swap}")
-define eb = Character("{bt}Eileen{/bt}", what_outlines=[ (.5, "#aFbFAA") ])
+define eb = Character("{bt}Eileen{/bt}", what_outlines=[ (.5, "#aFbFAA") ], what_color="#aa0000")
 
 default playername = "Player"
 
@@ -21,7 +21,7 @@ label start:
     e "Wanna see some new text effects I've been making?"
     # I know these first couple are a bit of an eye sore but wanted to show here how to apply styles to the effects.
     # And how previous styling won't be applied through them...
-    e "Here is some {bt=10}wavy bouncey{/bt} text"
+    eb "Here is some {bt=10}wavy bouncey{/bt} text"
     e "Here is some {sc}{b}{i}{font=FOT-PopJoyStd-B.otf}{=test_style}scared{/b} sha{/font}key{/i}{/=test_style}{/sc} text"
     e "Here is some {rotat}spinning rotation{/rotat} text"
     e "{fi=0-0.5}Here is some fade in text{/fi}"
