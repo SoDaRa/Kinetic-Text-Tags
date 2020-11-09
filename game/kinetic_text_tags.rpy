@@ -451,29 +451,38 @@ init python:
     # Demonstration of changing text styles on the fly
     # Could also predefine some styles and swap between those as well!
     # Also for this effect in particular, I ---HIGHLY--- advise building in some way to disable it
-    # as it can be pretty harsh on the eyes. When I have time I'll create an implementation
-    # that allows for disabling it everywhere. Likely just a preference variable you
-    # can turn off and that the class checks before applying random styles.
+    # as it can be pretty harsh on the eyes.
+    # An example of how you can make this a preference option is included below.
     class ChaosText(renpy.Displayable):
+        # Some may want to have this list be more of a global variable than baked into the class.
         font_list = ["FOT-PopJoyStd-B.otf", "GrenzeGotisch-VariableFont_wght.ttf", "Pacifico-Regular.ttf", "RobotoSlab-ExtraBold.ttf",\
                      "RobotoSlab-Medium.ttf", "SyneTactile-Regular.ttf", "TurretRoad-Bold.ttf", "TurretRoad-ExtraBold.ttf", "TurretRoad-ExtraLight.ttf", \
                      "TurretRoad-Light.ttf", "TurretRoad-Medium.ttf", "TurretRoad-Regular.ttf"]
+        #Just a list so we can pull any hex value randomly
         color_choice = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
         def __init__(self, orig_text, **kwargs):
 
-            # Pass additional properties on to the renpy.Displayable
-            # constructor.
             super(ChaosText, self).__init__(**kwargs) #REMEMBER TO RENAME HERE TO YOUR CLASS
 
             # Create our child
             self.child = renpy.text.text.Text(orig_text)
             self.orig_text = orig_text
+            self.last_style = None # This will be used for renders if the user wants to stop chaos text
 
         def render(self, width, height, st, at):
+            if not gui.preference("chaos_on"):  # This defined (near the top of) in gui.rpy and can be set in the preferences screen (see line 753-756 in screens.rpy)
+                if self.last_style is not None: # If this is our first render, then should do that first
+                    # Rest of this is just a repeat of what's below.
+                    self.child.set_text(self.last_style.apply_style(self.orig_text))
+                    child_render = renpy.render(self.child, width, height, st, at)
+                    self.width, self.height = child_render.get_size()
+                    render = renpy.Render(self.width, self.height)
+                    render.subpixel_blit(child_render, (0, 0))
+                    return render
+
             new_style = DispTextStyle()
-            six_element = [1,1,1,1,1,1]
             new_color = ""
-            for i in six_element:
+            for i in range(0,6):
                 new_color += renpy.random.choice(self.color_choice)
             new_color = "#" + new_color
             new_style.add_tags("color=" + str(new_color))
@@ -488,14 +497,13 @@ init python:
             # Create a render from the child.
             # Replace self.child with t to include an alpha or zoom transform
             child_render = renpy.render(self.child, width, height, st, at)
-
             self.width, self.height = child_render.get_size()
             render = renpy.Render(self.width, self.height)
 
             # Blit (draw) the child's render to our render.
             render.subpixel_blit(child_render, (0, 0))
-
-            renpy.redraw(self, 0)
+            renpy.redraw(self,0)
+            self.last_style = new_style
             return render
 
         def visit(self):

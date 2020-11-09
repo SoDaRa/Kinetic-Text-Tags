@@ -748,6 +748,12 @@ screen preferences():
                     textbutton _("Unseen Text") action Preference("skip", "toggle")
                     textbutton _("After Choices") action Preference("after choices", "toggle")
                     textbutton _("Transitions") action InvertSelected(Preference("transitions", "toggle"))
+                #Option to disable the Chaos Text Tag
+                vbox:
+                    style_prefix "radio"
+                    label _("Chaos Text")
+                    textbutton _("On") action gui.SetPreference("chaos_on", True)
+                    textbutton _("Off") action gui.SetPreference("chaos_on", False)
 
                 ## Additional vboxes of type "radio_pref" or "check_pref" can be
                 ## added here, to add additional creator-defined preferences.
