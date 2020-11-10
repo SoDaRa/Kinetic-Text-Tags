@@ -324,6 +324,18 @@ init python:
 
             return new_string
 
+    # If you are using the modified text.py, then add these lines to any class you
+    # want them to be used on. This will enable the Text holding your Wrapper
+    # class so send its style and style prefix updates down to your wrapper
+    # which can then update its child.
+    """
+    def set_style_prefix(self, prefix, root):
+        super(BounceText, self).set_style_prefix(prefix, root)
+        self.child.set_style_prefix(prefix, root)
+    def set_style(self, style):
+        self.child.set_style(style)
+    """
+
     # Basic text displacement demonstration
     class BounceText(renpy.Displayable):
         def __init__(self, child, char_offset, bounce_height=20, **kwargs):
@@ -344,7 +356,7 @@ init python:
         def render(self, width, height, st, at):
             # Where the current offset is calculated
             # (self.char_offset * -.1) makes it look like the left side is leading
-            # We use st to keep the time of the sine wave
+            # We use st to allow this to change over time
             curr_height = math.sin(self.freq*(st+(float(self.char_offset) * -.1))) * float(self.bounce_height)
 
             ####  A transform will only alter zoom or alpha as far as I know with Text  ####
@@ -368,17 +380,6 @@ init python:
 
         def visit(self):
             return [ self.child ]
-        # If you are using the modified text.py, then add these lines to any class you
-        # want them to be used on. This will enable the Text holding your Wrapper
-        # class so send its style and style prefix updates down to your wrapper
-        # which can then update its child.
-        """
-        def set_style_prefix(self, prefix, root):
-            super(BounceText, self).set_style_prefix(prefix, root)
-            self.child.set_style_prefix(prefix, root)
-        def set_style(self, style):
-            self.child.set_style(style)
-        """
 
     # Simple fade in. Helps show some ideas for timing
     # May want to modify to allow it to skip to the end if the user clicks.
@@ -394,6 +395,7 @@ init python:
             self.display_time = .01
             self.slide_distance = 100
             # This is to get seconds per character on screen for later
+            # Allowing this effect to scale with the player's desired text speed
             self.cps = 0.0
             if renpy.game.preferences.text_cps is not 0: # Avoid division by 0.0
                 self.cps = (1.0 / renpy.game.preferences.text_cps)
@@ -472,7 +474,7 @@ init python:
             self.last_style = None # This will be used for renders if the user wants to stop chaos text
 
         def render(self, width, height, st, at):
-            if not gui.preference("chaos_on"):  # This defined (near the top of) in gui.rpy and can be set in the preferences screen (see line 753-756 in screens.rpy)
+            if not gui.preference("chaos_on"):  # This preference defined near the top of gui.rpy. And can be set in the preferences screen (see line 753-756 in screens.rpy)
                 if self.last_style is not None: # If this is our first render, then should do that first
                     # Rest of this is just a repeat of what's below.
                     self.child.set_text(self.last_style.apply_style(self.orig_text))
@@ -482,30 +484,30 @@ init python:
                     render.subpixel_blit(child_render, (0, 0))
                     return render
 
+            # We'll create a new text style for this render
             new_style = DispTextStyle()
             new_color = ""
+            # Create a random color using hex values
             for i in range(0,6):
                 new_color += renpy.random.choice(self.color_choice)
             new_color = "#" + new_color
             new_style.add_tags("color=" + str(new_color))
-
+            # Random size
             rand_size = renpy.random.randint(0,50)
             new_style.add_tags("size="+str(rand_size))
-
+            # Random font
             rand_font = renpy.random.choice(self.font_list)
             new_style.add_tags("font="+rand_font)
-
+            #Apply our style to our Text child
             self.child.set_text(new_style.apply_style(self.orig_text))
             # Create a render from the child.
-            # Replace self.child with t to include an alpha or zoom transform
             child_render = renpy.render(self.child, width, height, st, at)
             self.width, self.height = child_render.get_size()
             render = renpy.Render(self.width, self.height)
-
-            # Blit (draw) the child's render to our render.
             render.subpixel_blit(child_render, (0, 0))
             renpy.redraw(self,0)
-            self.last_style = new_style
+
+            self.last_style = new_style # Save the current style for if the user wishes to turn off the Chaos tag
             return render
 
         def visit(self):
@@ -514,7 +516,6 @@ init python:
     # Could honestly still use some work. But it's a start and good proof of concept
     # Credit to the FancyText module creator yukinogatari for the idea.
     # FancyText module can be found at https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=59587
-
     class RotateText(renpy.Displayable):
         def __init__(self, child, speed=100, **kwargs):
             super(RotateText, self).__init__(**kwargs)
@@ -545,6 +546,7 @@ init python:
             return [ self.child ]
 
     """
+    # Example of above but using matrix functions. Some may find it more useful.
     class RotateText(renpy.Displayable):
         def __init__(self, child, speed=100, **kwargs):
             super(RotateText, self).__init__(**kwargs)
@@ -627,6 +629,7 @@ init python:
             delta = st - self.st # How long since last update
             self.timer += delta
             if self.timer > self.s_time:
+                # If time to swap, determine which one to swap to.
                 if self.swap_to_1:
                     self.child.set_text(self.start_tags + self.text1 + self.end_tags)
                     self.swap_to_1 = False
@@ -637,12 +640,11 @@ init python:
                     self.timer = 0.0
 
             child_render = renpy.render(self.child, width, height, st, at)
-
             self.width, self.height = child_render.get_size()
             render = renpy.Render(self.width, self.height)
-
             render.subpixel_blit(child_render, (0,0))
             renpy.redraw(self, 0)
+
             self.st = st # So we can check how long since last update
             return render
 
@@ -662,13 +664,13 @@ init python:
             child_render = renpy.render(self.child, width, height, st, at)
             self.width, self.height = child_render.get_size()
             render = renpy.Render(self.width, self.height)
-
+            # Use our child's position as determined by the event function
             render.subpixel_blit(child_render, (self.xpos, self.ypos))
             return render
 
         # Mostly stolen from the SpriteManager example in the documentation
         def event(self, ev, x, y, st):
-            # x and y are relative to the top left corner of the displayable initally.
+            # x and y are relative to the top left corner of the displayable initially.
             # So we'll want to update it to reflect the actual position of our text
             trans_x = x - self.xpos - (self.width / 2)
             trans_y = y - self.ypos - (self.height / 2)
@@ -684,23 +686,6 @@ init python:
 
             # Pass the event to our child.
             return self.child.event(ev, x, y, st)
-
-        def visit(self):
-            return [ self.child ]
-
-    # Just something I did for fun
-    class GradientText(renpy.Displayable):
-        def __init__(self, child, **kwargs):
-            super(GradientText, self).__init__(**kwargs) # REMEMBER TO RENAME HERE TO YOUR CLASS
-            self.child = child
-        def render(self, width, height, st, at):
-            child_render = renpy.render(self.child, width, height, st, at)
-            self.width, self.height = child_render.get_size()
-            render = renpy.Render(self.width, self.height)
-            render.subpixel_blit(child_render, (0, 0))
-
-            renpy.redraw(self, 0) # This lets it know to redraw this indefinitely
-            return render
 
         def visit(self):
             return [ self.child ]
@@ -803,6 +788,7 @@ init python:
 
     def rotate_tag(tag, argument, contents):
         new_list = [ ]
+        # Argument here will reprsent the desired speed of the rotation.
         if argument == "":
             argument = 100
         my_style = DispTextStyle()
@@ -824,6 +810,10 @@ init python:
         new_list = [ ]
         if argument == "":
             return contents
+        # This tag expects that each argument is the same length and that it is
+        # applied to a length of text of equal length to the arguments.
+        # This is a pretty static way of doing it mostly made to demonstrate the concept.
+        # You'll probably want to allow yours more flexibility depending on your needs.
         text1, _, argument = argument.partition("@")
         text2, _, argument = argument.partition("@")
         if len(text1) != len(text2):
@@ -948,6 +938,8 @@ init python:
         return new_list
 
     """
+
+    # Template tag function to copy off of.
     def TEMPLATE_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "":
@@ -977,10 +969,13 @@ init python:
     config.custom_text_tags["move"] = move_tag
     config.custom_text_tags["omega"] = omega_tag
     config.self_closing_custom_text_tags["para"] = paragraph_tag
+    # Template tag function
     #config.custom_text_tags[""] = _tag
 
-    # Made these ones just for fun. Leaving them in here just in case anyone wants
-    # to use them. Sorry if not as well documented.
+    ##### Made these ones just for fun. Leaving them in here just in case anyone wants
+    ##### to use them. Probably will not add them to the Omega tag or to DispTextStyle
+
+    # Determines what color to apply to a letter in the gradient and gradient2 tags
     def color_gradient(color_1, color_2, range, index):
         """
         'color_1'
@@ -994,7 +989,7 @@ init python:
 
         returns a string representing the index into the gradient
         """
-        rv = "#"
+        rv = "#" # rv stands for return value
         # Return early if at the ends
         if index == 0:
             return color_1
@@ -1016,14 +1011,17 @@ init python:
         green_f = green_1 + (index * (green_2 - green_1) / range)
         blue_f = blue_1 + (index * (blue_2 - blue_1) / range)
 
+        # If a value is over 255, then you input something wrong
         if red_f > 255 or green_f > 255 or blue_f > 255:
             renpy.notify("ERROR IN COLOR_GRADIENT")
-        hex_red = hex(red_f)
-        hex_red = hex_red[2:4]
+        # Get the hex value of the rgb channels
+        hex_red = hex(red_f)   # Convert to a hex string
+        hex_red = hex_red[2:4] # Strip the leading "0x"
         hex_green = hex(green_f)
         hex_green = hex_green[2:4]
         hex_blue = hex(blue_f)
         hex_blue = hex_blue[2:4]
+        # Append a 0 to the string if we'd only get one character
         if red_f < 16:
             hex_red = "0" + hex_red
         if green_f < 16:
@@ -1033,65 +1031,7 @@ init python:
         rv = rv + hex_red + hex_green + hex_blue
         return rv
 
-    class GradientText(renpy.Displayable):
-        def __init__(self, char, col_list, id, list_end, **kwargs):
-            """
-            col_list format
-                (color_1, color_2, end_id)
-            list_end should be the number of gradients in the list
-            """
-            super(GradientText, self).__init__(**kwargs)
-
-            self.char = char
-            self.child = Text(char)
-            self.col_list = col_list
-            self.id = id
-            self.list_end = list_end
-            # Figure out which gradient we are in
-            for i, element in enumerate(col_list):
-                if self.id < element[2]:
-                    self.curr_grad = i
-                    break
-            # Determine the current range (for color_gradient func later)
-            if self.curr_grad is 0:
-                self.curr_range = self.col_list[0][2]
-            else:
-                self.curr_range = self.col_list[self.curr_grad][2] - self.col_list[self.curr_grad - 1][2]
-
-        def render(self, width, height, st, at):
-            my_style = DispTextStyle()
-            # Get the color to apply to the text
-            if self.curr_grad == 0:
-                my_style.add_tags("color=" + color_gradient(self.col_list[self.curr_grad][0], self.col_list[self.curr_grad][1], self.curr_range, self.id))
-            else:
-                my_style.add_tags("color=" + color_gradient(self.col_list[self.curr_grad][0], self.col_list[self.curr_grad][1], self.curr_range, self.id - self.col_list[self.curr_grad - 1][2]))
-            self.child.set_text(my_style.apply_style(self.char))
-
-            child_render = renpy.render(self.child, width, height, st, at)
-            self.width, self.height = child_render.get_size()
-            render = renpy.Render(self.width, self.height)
-
-            render.subpixel_blit(child_render, (0, 0))
-            renpy.redraw(self, 0)
-            # Iterate id
-            self.id += 1
-            # If we are at the end of the range update gradient
-            if self.id > self.col_list[self.curr_grad][2]:
-                self.curr_grad += 1
-                # If at the end of our color list, reset back to 0
-                if self.curr_grad == self.list_end:
-                    self.curr_grad = 0
-                    self.id = 0
-                    self.curr_range = self.col_list[0][2]
-                # Otherwise just update the range
-                else:
-                    self.curr_range = self.col_list[self.curr_grad][2] - self.col_list[self.curr_grad - 1][2]
-
-            return render
-
-        def visit(self):
-            return [ self.child ]
-
+    # This tag applies a static gradient over text
     def gradient_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "":
@@ -1126,27 +1066,82 @@ init python:
                 new_list.append((kind,text))
         return new_list
 
+    # A custom displayable that applies a gradient over a letter of text.
+    # Honestly didn't test this works with other text tags since was just for fun
+    class GradientText(renpy.Displayable):
+        def __init__(self, char, col_list, id, list_end, **kwargs):
+            """
+            col_list format
+                (color_1, color_2, end_id)
+            list_end should be the number of gradients in the list
+            """
+            super(GradientText, self).__init__(**kwargs)
+
+            self.char = char
+            self.child = Text(char)
+            self.col_list = col_list # Calling it grad_list for gradient might be more appropriate.
+            self.id = id
+            self.list_end = list_end
+            # Figure out which gradient we are in
+            for i, element in enumerate(col_list):
+                if self.id < element[2]:
+                    self.curr_grad = i
+                    break
+            # Determine the current range (for color_gradient func later)
+            if self.curr_grad is 0:
+                self.curr_range = self.col_list[0][2]
+            else:
+                self.curr_range = self.col_list[self.curr_grad][2] - self.col_list[self.curr_grad - 1][2]
+
+        def render(self, width, height, st, at):
+            my_style = DispTextStyle()
+            # Get the color to apply to the text
+            if self.curr_grad == 0:
+                my_style.add_tags("color=" + color_gradient(self.col_list[self.curr_grad][0], self.col_list[self.curr_grad][1], self.curr_range, self.id))
+            else: # color_gradient() expects id to be within the range given. So must reduce to that if exceeding it.
+                my_style.add_tags("color=" + color_gradient(self.col_list[self.curr_grad][0], self.col_list[self.curr_grad][1], self.curr_range, self.id - self.col_list[self.curr_grad - 1][2]))
+
+            # Usual retrieval and drawing of child render
+            self.child.set_text(my_style.apply_style(self.char))
+            child_render = renpy.render(self.child, width, height, st, at)
+            self.width, self.height = child_render.get_size()
+            render = renpy.Render(self.width, self.height)
+            render.subpixel_blit(child_render, (0, 0))
+            renpy.redraw(self, 0)
+
+            # Iterate id for next render
+            self.id += 1
+            # If we are at the end of the range update gradient
+            if self.id > self.col_list[self.curr_grad][2]:
+                self.curr_grad += 1
+                # If at the end of our color list, reset back to 0
+                if self.curr_grad == self.list_end:
+                    self.curr_grad = 0
+                    self.id = 0
+                    self.curr_range = self.col_list[0][2]
+                # Otherwise just update the range
+                else:
+                    self.curr_range = self.col_list[self.curr_grad][2] - self.col_list[self.curr_grad - 1][2]
+
+            return render
+
+        def visit(self):
+            return [ self.child ]
+
+    # This tag applies a gradient that smoothly rolls over the letters
     def gradient2_tag(tag, argument, contents):
-        """
-        arg format
-            first partition is number gradients
-            for # of elements
-                color_1-color_2-end_num
-            end_num should be the index to stop that segment of gradient at.
-            The final end_num should be the total number of letters in the sequence
-        """
         new_list = [ ]
         if argument == "":
             return
         else: # Note: All arguments must be supplied
-            arg_num, _, argument = argument.partition('-')
+            arg_num, _, argument = argument.partition('-') # Number of gradients to read
         arg_num = int(arg_num)
         # Get all arguments
         col_list = []
         for i in range(arg_num):
-            col_1, _, argument = argument.partition('-')
-            col_2, _, argument = argument.partition('-')
-            end_num, _, argument = argument.partition('-')
+            col_1, _, argument = argument.partition('-')   # Color 1
+            col_2, _, argument = argument.partition('-')   # Color 2
+            end_num, _, argument = argument.partition('-') # Last index of the gradient
             col_list.append((col_1, col_2, int(end_num)))
 
         my_index = 0
