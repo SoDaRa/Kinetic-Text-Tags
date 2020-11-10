@@ -24,6 +24,8 @@ label start:
     eb "Here is some {bt=10}wavy bouncey{/bt} text"
     e "Here is some {sc}{b}{i}{font=FOT-PopJoyStd-B.otf}{=test_style}scared{/b} sha{/font}key{/i}{/=test_style}{/sc} text"
     e "Here is some {rotat}spinning rotation{/rotat} text"
+    e "Here is a {gradient=#ff0000-#00ff00}fancy gradient{/gradient} {gradient=#00ff00-#0000ff}with every color{/gradient} {gradient=#0000ff-#ff0000}of the rainbow{/gradient}!!"
+    e "Here is a {gradient2=3-#ff0000-#00ff00-5-#00ff00-#0000ff-10-#0000ff-#ff0000-15}fancy gradient with every color of the rainbow{/gradient2}!!"
     e "{fi=0-0.5}Here is some fade in text{/fi}"
     e "Here is some more selective {fi=13-1.5}fade in{/fi} text"
     e "Here is some {move}{b}moveable sliding{/move} text. Move your mouse near it to see!!"
