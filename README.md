@@ -19,7 +19,7 @@ Just add some Kinetic Text Tags to your Ren'py project and you'll be flinging te
 
 To use what I've made or to learn how to create your own, simply include **[kinetic_text_tags.rpy](https://github.com/SoDaRa/Kinetic-Text-Tags/blob/main/game/kinetic_text_tags.rpy)** in your project and read over the code and comments for how you can get started and to learn how to create your own.
 
-## NOTE: 
+#### Note: 
 You will have to define any style information within the text tag itself as it is not automatically inherited. If you would like for automatic style inheritance, please see the Advanced section down below for a renpy modification that will help with that. 
 
 ## How it works
