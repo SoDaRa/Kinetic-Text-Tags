@@ -312,7 +312,8 @@ screen navigation():
         # for screens, better to use imagebuttons instead.
         # If you'd like to use them with textbuttons however or just have automatic style
         # inheritance, feel free check out the github for a guide on how to install
-        # a renpy modification that allows for it. 
+        # a renpy modification that allows for it.
+        # Special thanks to Lemmasoft forum user, _ticlock_, for mentioning this workaround.
         imagebutton:
             idle Text("{rotat}{color=#888888}Load{/rotat}")
             hover Text("{rotat}{color=#c184ff}Load{/rotat}")
