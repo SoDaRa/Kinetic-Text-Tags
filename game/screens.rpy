@@ -308,10 +308,24 @@ screen navigation():
             textbutton _("History") action ShowMenu("history")
 
             textbutton _("Save") action ShowMenu("save")
-    # Example of button not really updating with hover. I'll see if I can fix it later...
-        textbutton _("{bt}Load{/bt}") action ShowMenu("load")
+        # Sadly these will not work well with textbuttons. If you'd want to use these
+        # for screens, better to use imagebuttons instead.
+        # If you'd like to use them with textbuttons however or just have automatic style
+        # inheritance, feel free check out the github for a guide on how to install
+        # a renpy modification that allows for it. 
+        imagebutton:
+            idle Text("{rotat}{color=#888888}Load{/rotat}")
+            hover Text("{rotat}{color=#c184ff}Load{/rotat}")
+            selected_idle Text("{rotat}{color=#ffffff}Load{/rotat}")
+            selected_hover Text("{rotat}{color=#ffffff}Load{/rotat}")
+            action ShowMenu("load")
 
-        textbutton _("{bt}Preferences{/bt}") action ShowMenu("preferences")
+        imagebutton:
+            idle Text("{bt=5}{color=#888888}Preferences{/bt}")
+            hover Text("{bt=5}{color=#c184ff}Preferences{/bt}")
+            selected_idle Text("{bt=5}{color=#ffffff}Preferences{/bt}")
+            selected_hover Text("{bt=5}{color=#ffffff}Preferences{/bt}")
+            action ShowMenu("preferences")
 
         if _in_replay:
 
@@ -737,10 +751,25 @@ screen preferences():
 
                 vbox:
                     style_prefix "radio"
-                    label _("{bt=5}Rollback{/bt} Side")
-                    textbutton _("Disable") action Preference("rollback side", "disable")
-                    textbutton _("{bt=5}Left{/bt}") action Preference("rollback side", "left")
-                    textbutton _("Right") action Preference("rollback side", "right")
+                    label _("{bt=5}{color=#9933ff}Rollback{/bt} Side")
+                    imagebutton:
+                        idle Text("{bt=5}{color=#888888}Disable{/bt}")
+                        hover Text("{bt=5}{color=#c184ff}Disable{/bt}")
+                        selected_idle Text("{bt=5}{color=#ffffff}Disable{/bt}")
+                        selected_hover Text("{bt=5}{color=#ffffff}Disable{/bt}")
+                        action Preference("rollback side", "disable")
+                    imagebutton:
+                        idle Text("{bt=5}{color=#888888}Left{/bt}")
+                        hover Text("{bt=5}{color=#c184ff}Left{/bt}")
+                        selected_idle Text("{bt=5}{color=#ffffff}Left{/bt}")
+                        selected_hover Text("{bt=5}{color=#ffffff}Left{/bt}")
+                        action Preference("rollback side", "left")
+                    imagebutton:
+                        idle Text("{bt=5}{color=#888888}Right{/bt}")
+                        hover Text("{bt=5}{color=#c184ff}Right{/bt}")
+                        selected_idle Text("{bt=5}{color=#ffffff}Right{/bt}")
+                        selected_hover Text("{bt=5}{color=#ffffff}Right{/bt}")
+                        action Preference("rollback side", "right")
 
                 vbox:
                     style_prefix "check"
@@ -752,7 +781,7 @@ screen preferences():
                 vbox:
                     style_prefix "radio"
                     label _("Chaos Text")
-                    textbutton _("On") action gui.SetPreference("chaos_on", True)
+                    textbutton _("{chaos}On{/chaos}") action gui.SetPreference("chaos_on", True)
                     textbutton _("Off") action gui.SetPreference("chaos_on", False)
 
                 ## Additional vboxes of type "radio_pref" or "check_pref" can be
