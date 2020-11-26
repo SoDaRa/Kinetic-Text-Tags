@@ -327,7 +327,7 @@ init python:
     # If you are using the modified text.py, then add these lines to any class you
     # want them to be used on. This will enable the Text holding your Wrapper
     # class so send its style and style prefix updates down to your wrapper
-    # which can then update its child.
+    # which can then update its child. Otherwise you can ignore this completely.
     """
     def set_style_prefix(self, prefix, root):
         super(BounceText, self).set_style_prefix(prefix, root)
