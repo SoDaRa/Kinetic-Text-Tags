@@ -11,9 +11,6 @@ init offset = -2
 init python:
     gui.init(1280, 720)
 
-##### Our preference to disable the chaos text #####
-define gui.chaos_on = gui.preference("chaos_on", True)
-
 ################################################################################
 ## GUI Configuration Variables
 ################################################################################

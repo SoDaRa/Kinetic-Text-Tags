@@ -31,6 +31,11 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+##### Our preference to disable the chaos text #####
+default gui.chaos_on = False  # You can change this to be gui.chaos_text or persistent.chaos_text if you'd prefer.
+
 init python:
 
     import math
@@ -474,7 +479,7 @@ init python:
             self.last_style = None # This will be used for renders if the user wants to stop chaos text
 
         def render(self, width, height, st, at):
-            if not gui.preference("chaos_on"):  # This preference defined near the top of gui.rpy. And can be set in the preferences screen (see line 753-756 in screens.rpy)
+            if not gui.chaos_on:                # This preference is defined near the top of this file.  And can be set in the preferences screen (see line 783-787 in screens.rpy)
                 if self.last_style is not None: # If this is our first render, then should do that first
                     # Rest of this is just a repeat of what's below.
                     self.child.set_text(self.last_style.apply_style(self.orig_text))
