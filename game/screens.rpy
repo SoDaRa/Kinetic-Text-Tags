@@ -783,8 +783,8 @@ screen preferences():
                 vbox:
                     style_prefix "radio"
                     label _("Chaos Text")
-                    textbutton _("{chaos}On{/chaos}") action SetVariable("gui.chaos_on", True)
-                    textbutton _("Off") action SetVariable("gui.chaos_on", False)
+                    textbutton _("{chaos}On{/chaos}") action SetVariable("preferences.chaos_on", True)
+                    textbutton _("Off") action SetVariable("preferences.chaos_on", False)
                 ############################################################################
 
                 ## Additional vboxes of type "radio_pref" or "check_pref" can be
