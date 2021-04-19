@@ -37,7 +37,6 @@ default preferences.chaos_on = False  # You can change this to be gui.chaos_text
 init python:
     import random
     import math
-    import pygame
 
     # This will maintain what styles we want to apply and help us apply them
     class DispTextStyle():
@@ -328,17 +327,7 @@ init python:
 
             return new_string
 
-    # If you are using the modified text.py, then add these lines to any class you
-    # want them to be used on. This will enable the Text holding your Wrapper
-    # class so send its style and style prefix updates down to your wrapper
-    # which can then update its child. Otherwise you can ignore this completely.
-    """
-    def set_style_prefix(self, prefix, root):
-        super(BounceText, self).set_style_prefix(prefix, root)
-        self.child.set_style_prefix(prefix, root)
-    def set_style(self, style):
-        self.child.set_style(style)
-    """
+
     ### TEXT WRAPPER CLASSES ###
     # Basic text displacement demonstration
     class BounceText(renpy.Displayable):
@@ -686,8 +675,8 @@ init python:
         def visit(self):
             return [ self.child ]
 
-    ### Custom Tag Functions ###
 
+    ### CUSTOM TAG FUNCTIONS ###
     # Letters move in a sine wave.
     # height: (int) The amplitude of the text's sine wave motion. How high and low it'll go from it's default position in pixels. Good for jubilent and floaty text.
     # Example: {bt=[height]}Text{/bt}
