@@ -19,19 +19,20 @@ label start:
     show eileen happy
 
     e "Wanna see some new text effects I've been making?"
+    e "Here's a {glitch=1.1}{color=#0f0}{b}Glitch{/b}{/color} Tag{/glitch}"
     # I know these first couple are a bit of an eye sore but wanted to show here how to apply styles to the effects.
     # And how previous styling won't be applied through them...
     eb "Here is some {bt=10}wavy bouncey{/bt} text"
     e "Here is some {sc}{b}{i}{font=FOT-PopJoyStd-B.otf}{=test_style}scared{/b} sha{/font}key{/i}{/=test_style}{/sc} text"
     e "Here is some {rotat}spinning rotation{/rotat} text"
     e "Here is a {gradient=#ff0000-#00ff00}fancy gradient{/gradient} {gradient=#00ff00-#0000ff}with every color{/gradient} {gradient=#0000ff-#ff0000}of the rainbow{/gradient}!!"
-    e "Here is a {gradient2=6-#ff0000-#ffff00-10-#ffff00-#00ff00-20-#00ff00-#00ffff-30-#00ffff-#0000ff-40-#0000ff-#ff00ff-50-#ff00ff-#ff0000-60}fancy gradient with every color of the rainbow{/gradient2}!!"
+    e "Here is a {gradient2=6-#ff0000-#ffff00-10-#ffff00-#00ff00-10-#00ff00-#00ffff-10-#00ffff-#0000ff-10-#0000ff-#ff00ff-10-#ff00ff-#ff0000-10}fancy gradient with every color of the rainbow{/gradient2}!!"
     e "{fi=0-0.5}Here is some fade in text{/fi}"
     e "Here is some more selective {fi=13-1.5}fade in{/fi} text"
     e "Here is some {move}{b}moveable sliding{/move} text. Move your mouse near it to see!!"
     e "I'm having conflicting feelings about this..."
-    e "{fi=0-0.5}There still seems to be some bugs. Like if I just keep typing this, this text will continue off the screen and you won't be able to read it.{/fi}"
-    e "{fi=0-0.5}But if we insert a paragraph tag into our line, we'll be able to tell {para}the text displayable to make a new paragraph to avoid the issue! {para}Huzzah!!{/fi}"
+    e "{bt=2}There still seems to be some bugs. Like if I just keep typing this, this text will continue off the screen and you won't be able to read it.{/bt}"
+    e "{bt=2}But if we insert a paragraph tag into our line, we'll be able to tell \nthe text displayable to make a new paragraph to avoid the issue! \nHuzzah!!{/bt}"
     es "I want to {swap=love@hate@1.0}{bt}feel{/bt}{/swap} it."
     e "And I feel something bad is about to {chaos}happen...{/chaos}"
     e "{chaos}Helllllp Mmeeeee!!!{/chaos}"

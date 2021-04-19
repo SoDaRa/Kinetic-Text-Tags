@@ -1,11 +1,9 @@
 """
  Kinetic Text Tags Ren'Py Module
- 2020 Daniel Westfall <SoDaRa2595@gmail.com>
-
+ 2021 Daniel Westfall <SoDaRa2595@gmail.com>
 
  http://twitter.com/sodara9
- I don't really have much to plug. Never made much of note before.
- But I'd appreciate being given credit if you do end up using it! :D Would really
+ I'd appreciate being given credit if you do end up using it! :D Would really
  make my day to know I helped some people out!
  Really hope this can help the community create some really neat ways to spice
  up their dialogue!
@@ -37,8 +35,9 @@
 default preferences.chaos_on = False  # You can change this to be gui.chaos_text or persistent.chaos_text if you'd prefer.
 
 init python:
-
+    import random
     import math
+    import pygame
 
     # This will maintain what styles we want to apply and help us apply them
     class DispTextStyle():
@@ -340,7 +339,7 @@ init python:
     def set_style(self, style):
         self.child.set_style(style)
     """
-
+    ### TEXT WRAPPER CLASSES ###
     # Basic text displacement demonstration
     class BounceText(renpy.Displayable):
         def __init__(self, child, char_offset, bounce_height=20, **kwargs):
@@ -364,7 +363,7 @@ init python:
             # We use st to allow this to change over time
             curr_height = math.sin(self.freq*(st+(float(self.char_offset) * -.1))) * float(self.bounce_height)
 
-            ####  A transform will only alter zoom or alpha as far as I know with Text  ####
+            ####  A Transform can be used for several effects   ####
             # t = Transform(child=self.child,  alpha = curr_height)
 
             # Create a render from the child.
@@ -396,35 +395,31 @@ init python:
             # The child.
             self.child = child
             self.fade_time = fade_time
-            self.char_num = char_num
             self.display_time = .01
             self.slide_distance = 100
             # This is to get seconds per character on screen for later
             # Allowing this effect to scale with the player's desired text speed
-            self.cps = 0.0
-            if renpy.game.preferences.text_cps is not 0: # Avoid division by 0.0
-                self.cps = (1.0 / renpy.game.preferences.text_cps)
+            cps = 0.0
+            if preferences.text_cps is not 0: # Avoid division by 0.0
+                cps = (1.0 / preferences.text_cps)
+            self.time_offset = char_num * cps  # How long to wait before doing things
 
         def render(self, width, height, st, at):
-            # How long to wait before doing things
-            time_offset = self.char_num * self.cps
-            alpha_time = 0.0
+            curr_alpha = 0.0
             xoff = 5.0
-            if st > time_offset:
-                adjust_st = st - time_offset # Adjust for time delay
-                alpha_time = adjust_st/self.fade_time
-                xoff = self.slide_distance - ((adjust_st/self.fade_time) * self.slide_distance)
-                if xoff < 0:
-                    xoff = 0
+            if st > self.time_offset:
+                adjust_st = st - self.time_offset # Adjust for time delay
+                curr_alpha = adjust_st/self.fade_time
+                xoff = max(self.slide_distance - ((adjust_st/self.fade_time) * self.slide_distance), 0)
             # Example of using transform to adjust alpha
-            t = Transform(child=self.child,  alpha = alpha_time)
+            t = Transform(child=self.child,  alpha = curr_alpha)
             child_render = renpy.render(t, width, height, st, at)
 
             self.width, self.height = child_render.get_size()
             render = renpy.Render(self.width, self.height)
             render.subpixel_blit(child_render, (xoff, 0))
-
-            if st <= self.fade_time + time_offset:
+            # Stop redrawing when the animation is finished.
+            if st <= self.fade_time + self.time_offset:
                 renpy.redraw(self, 0)
             return render
 
@@ -443,8 +438,8 @@ init python:
 
         def render(self, width, height, st, at):
             # Randomly move the offset of the text's render.
-            xoff = (renpy.random.random()-.5) * float(self.square)
-            yoff = (renpy.random.random()-.5) * float(self.square)
+            xoff = (random.random()-.5) * float(self.square)
+            yoff = (random.random()-.5) * float(self.square)
 
             child_render = renpy.render(self.child, width, height, st, at)
             self.width, self.height = child_render.get_size()
@@ -518,11 +513,9 @@ init python:
         def visit(self):
             return [ self.child ]
 
-    # Could honestly still use some work. But it's a start and good proof of concept
-    # Credit to the FancyText module creator yukinogatari for the idea.
-    # FancyText module can be found at https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=59587
+    # Demonstration of using a Transform on the text and applying rotation
     class RotateText(renpy.Displayable):
-        def __init__(self, child, speed=100, **kwargs):
+        def __init__(self, child, speed=300, **kwargs):
             super(RotateText, self).__init__(**kwargs)
 
             self.child = child
@@ -532,72 +525,66 @@ init python:
         def render(self, width, height, st, at):
 
             theta = math.radians(st * float(self.speed))
-            c, s = math.cos(theta), math.sin(theta)
-
-            child_render = renpy.render(self.child, width, height, st, at)
-
-            child_render.reverse = renpy.display.matrix.Matrix2D(c, -s, s, c)
+            t = Transform(child=self.child,  rotate=st*float(self.speed))
+            child_render = renpy.render(t, width, height/2, st, at)
 
             self.width, self.height = child_render.get_size()
-            render = renpy.Render(self.width, self.height)
+            render = renpy.Render(self.width, self.height/2)
 
-            # Try to adjust the positioning with the rotataion. Honestly needs more work
-            # I just didn't feel like doing the math for it right now.
-            render.subpixel_blit(child_render, (s * self.width+5, -c * self.height/2 + 10))
+            # Problem with using a Transform though is that each character will be padded
+            # Because the rotation may make it wider or taller depending on the character and angle.
+            # How best to tackle this though may vary depending on how you'd like to implement it.
+            render.blit(child_render, (0,0))
             renpy.redraw(self, 0)
             return render
 
         def visit(self):
             return [ self.child ]
 
+    # The following is an alternative version of rotate that allows for rotation in the x and y axis
+    # Functionally equivalent to using a Transform and flipping it using ATL xzoom and yzoom constrained between 0 and 1
+    # Using a Transform might be better in some cases, but I'll leave this here for anyone who'd prefer to work with angles
+    # for this kind of effect.
+    # Other matrix functions of note include
+    # renpy.display.matrix.perspective(w,h,n,p,f)
+    # renpy.display.matrix.screen_projection(w,h) < Renpy space to OpenGL viewport
+    # renpy.display.matrix.texture_projection(w,h) < Renpy space to OpenGL render-to-texture
+    # You can look up more about them in the renpy\display\matrix_functions.pyx file
+    # Credit to the FancyText module creator yukinogatari for the idea.
+    # FancyText module can be found at https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=59587
     """
-    # Example of above but using matrix functions. Some may find it more useful.
     class RotateText(renpy.Displayable):
         def __init__(self, child, speed=100, **kwargs):
             super(RotateText, self).__init__(**kwargs)
 
             self.child = child
-
             self.speed = speed # The speed of our rotation
 
         def render(self, width, height, st, at):
-            # Altering this can allow you to rotate in the x and y axis as well!!
-            # They're honestly probably easier to make look good too...
-            rotation_m = renpy.display.matrix.rotate(0,st*self.speed,0)
+            angle = st * self.speed
+            # Which parameter you put the 'angle' into will affect which axis the render rotates on.
+            # Try moving it around and seeing what happens.
+            rotation_m = renpy.display.matrix.rotate(angle,0,0)
 
             child_render = renpy.render(self.child, width, height, st, at)
             c_width, c_height = child_render.get_size()
-
+            # This applies the rotation to our child's render.
             child_render.reverse = rotation_m
-
-            # Math nerds might realize I'm not offsetting the transform.
-            # While renpy.display.matrix.offset(x,y,z) would seem to do that
-            # In my experiments it didn't do much to help. Feel free to play around
-            # with it though if you want. Other matrix functions include
-            # renpy.display.matrix.perspective(w,h,n,p,f)
-            # renpy.display.matrix.screen_projection(w,h) < Renpy space to OpenGL viewport
-            # renpy.display.matrix.texture_projection(w,h) < Renpy space to OpenGL render-to-texture
-            # You can look up more about them in the renpy\display\matrix_functions.pyx file
 
             self.width, self.height = child_render.get_size()
             render = renpy.Render(self.width, self.height)
 
+            # Math nerds might realize I'm not offsetting the transform.
+            # While renpy.display.matrix.offset(x,y,z) is a thing, it won't change much
+            # The real place to apply the offset is in your final blit. Which is what we'll calculate here
+
+            # Rotations on x axis
+            theta2 = math.radians(st * float(self.speed) + 180)
+            c = math.cos(theta2) + 1.0
             xoff = 0
-            #Rotations on y axis
-            theta = math.radians(st * float(self.speed))
-            s = math.cos(theta)
-            xoff= (-s * self.width/2) + 3 # +3 just to give some space from other letters.
-
-            yoff = 0
-            #Rotations on x axis
-            #theta2 = math.radians(st * float(self.speed) + 180)
-            #c = math.cos(theta2) + 1.0
-            #yoff = c * self.height
-            #if yoff > self.height:
-            #    yoff = self.height
-
-            # Try to adjust the positioning with the rotataion. Honestly needs more work
-            # I just didn't feel like doing the math for it right now.
+            yoff = c * self.height
+            if yoff > self.height:
+                yoff = self.height
 
             render.subpixel_blit(child_render, (xoff,yoff))
             renpy.redraw(self, 0)
@@ -657,45 +644,53 @@ init python:
             return [ self.child ]
 
     # An example of text that moves and reacts to the mouse.
+    # Sidenote: The position the mouse is distorted if the screen is resized.
+    # I did try to find a way to counteract this, but didn't have much luck.
+    # Seems to only happen on the x component though. No clue why.
+    # If anyone can pinpoint the issue, please let me know and I'll be happy to fix it.
     class MoveText(renpy.Displayable):
         def __init__(self, child, **kwargs):
             super(MoveText, self).__init__(**kwargs)
-
+            self.affect_distance = 150
             self.child = child
-            self.xpos = 0.0
-            self.ypos = 0.0
+            self.mouse_pos = (1000,1000)
+            self.pos = (0,0)
 
         def render(self, width, height, st, at):
             child_render = renpy.render(self.child, width, height, st, at)
             self.width, self.height = child_render.get_size()
             render = renpy.Render(self.width, self.height)
-            # Use our child's position as determined by the event function
-            render.subpixel_blit(child_render, (self.xpos, self.ypos))
-            return render
-
-        # Mostly stolen from the SpriteManager example in the documentation
-        def event(self, ev, x, y, st):
-            # x and y are relative to the top left corner of the displayable initially.
+            # x and y we get in the event function are relative to the top left corner of the displayable initially.
             # So we'll want to update it to reflect the actual position of our text
-            trans_x = x - self.xpos - (self.width / 2)
-            trans_y = y - self.ypos - (self.height / 2)
-            distance = math.hypot(trans_x , trans_y )
+            trans_x = self.mouse_pos[0] - self.pos[0] - (self.width / 2)
+            trans_y = self.mouse_pos[1] - self.pos[1] - (self.height / 2)
 
             vl = math.hypot(trans_x,trans_y)
-            if vl >= 150:
-                return
-            distance = 3.0 * (150-vl) / 150
-            self.xpos -= distance * trans_x / vl
-            self.ypos -= distance * trans_y / vl
+            xpos, ypos = self.pos
+            # Can skip calculation if vector length is further than our specified effect distance
+            if vl < self.affect_distance:
+                distance = 3.0 * (self.affect_distance-vl) / self.affect_distance
+                xpos -= distance * trans_x / vl
+                ypos -= distance * trans_y / vl
+                self.pos = (xpos, ypos) # Preserve the new pos
+            # Use our child's position as determined by the event function
+            render.subpixel_blit(child_render, (xpos, ypos))
             renpy.redraw(self, 0)
+            return render
 
+        def event(self, ev, x, y, st):
+            self.mouse_pos = (x,y)
             # Pass the event to our child.
             return self.child.event(ev, x, y, st)
 
         def visit(self):
             return [ self.child ]
 
-    # Our Custom Tag Functions
+    ### Custom Tag Functions ###
+
+    # Letters move in a sine wave.
+    # height: (int) The amplitude of the text's sine wave motion. How high and low it'll go from it's default position in pixels. Good for jubilent and floaty text.
+    # Example: {bt=[height]}Text{/bt}
     def bounce_tag(tag, argument, contents):
         new_list = [ ] # The list we will be appending our displayables into
         if argument == "": # If the argument received is blank, insert a default value
@@ -726,6 +721,11 @@ init python:
 
         return new_list
 
+    # Letters will start off to the right & invisible. And will then move left while increasing their opacity. Good for meditation and calm text.
+    # offset: (int) Offset within the line. Needed to help time start of fade-in with other slow text characters.
+    # time: (float) How long in seconds the animation lasts.
+    # Example: {fi=[offset]-[time]}Text{/fi}
+    # TODO: Update so can specify arguments better without needing both.
     def fade_in_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "":
@@ -733,9 +733,6 @@ init python:
             fade_time = 5.0
         else: # Note: if you include one argument, you should include both
             my_index_str, _, fade_time_str = argument.partition('-')
-            # my_index is meant to be how far into the string the letter is
-            # that way it can schedule when to move based on the first character
-            # to be displayed
             my_index = int(my_index_str)
             fade_time = float(fade_time_str)
         my_style = DispTextStyle()
@@ -756,6 +753,10 @@ init python:
                 new_list.append((kind,text))
         return new_list
 
+    # Letters change position every frame randomly. Good for very angry or quivering dialogue.
+    # range: (int) Letters are confined to a square around their default location. Range determines length of the sides of that square.
+    #              Higher values will make it very chaotic while smaller values will make it quite minimal.
+    # Example: {sc=[range]}Text{/sc}
     def scare_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "":
@@ -775,6 +776,10 @@ init python:
 
         return new_list
 
+    # Letters change their font, color and size every frame.
+    # Example: {chaos}Text{/chaos}
+    # Honestly more a demonstration of what can be done than useful in it's own right.
+    # If you create tags this chaotic, please include a way to turn it off for people with epilepsy.
     def chaos_tag(tag, argument, contents):
         new_list = [ ]
         my_style = DispTextStyle()
@@ -791,11 +796,16 @@ init python:
 
         return new_list
 
+    # Letters rotate in place. Good for stylized intros or UI
+    # Speed: (int) How fast the rotation will be.
+    # Example: {rotat=[speed]}Text{/rotat}
     def rotate_tag(tag, argument, contents):
         new_list = [ ]
         # Argument here will reprsent the desired speed of the rotation.
         if argument == "":
-            argument = 100
+            argument = 400
+        else:
+            argument = int(argument)
         my_style = DispTextStyle()
         for kind,text in contents:
             if kind == renpy.TEXT_TEXT:
@@ -811,14 +821,18 @@ init python:
 
         return new_list
 
+    # Causes letters to change between two strings every couple of seconds.
+    # text1:     (String) First set of characters to display. Should be equal to the length of the characters we're replacing
+    # text2:     (String) Second set of characters to display. Should be equal to the length of text1
+    # swap_time: (int) Length of time between character swap
+    # Arguments are separated by '@'. Length of strings should not exceed length of text they are replacing.
+    # Example: {swap=Text@Four@0.5}Text{}
+    # This is a pretty static way of doing it mostly made to demonstrate the concept.
+    # Included for others to build upon for their needs.
     def swap_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "":
             return contents
-        # This tag expects that each argument is the same length and that it is
-        # applied to a length of text of equal length to the arguments.
-        # This is a pretty static way of doing it mostly made to demonstrate the concept.
-        # You'll probably want to allow yours more flexibility depending on your needs.
         text1, _, argument = argument.partition("@")
         text2, _, argument = argument.partition("@")
         if len(text1) != len(text2):
@@ -839,6 +853,8 @@ init python:
                 new_list.append((kind,text))
         return new_list
 
+    # Makes it so the text within moves away from the mouse. More example of what can be done than useful
+    # Example: {move}Text{/move}
     def move_tag(tag, argument, contents):
         new_list = [ ]
         my_style = DispTextStyle()
@@ -855,20 +871,34 @@ init python:
                 new_list.append((kind,text))
         return new_list
 
-    # Turns out some text effects won't allow for a paragraph break if applied to a whole line
+    # Some text effects won't allow for a paragraph break if applied to a whole line
     # Which can cause your text to just continue straight off the screen.
     # To amend this, you can insert the {para} tag.
     # This will let the Text displayable holding us know when to wrap.
+    # Can also use \n in most cases. But leaving this for people who may already be using it
+    # or for cases where \n doesn't work.
     def paragraph_tag(tag, argument):
         return [(renpy.TEXT_PARAGRAPH, "")]
 
     # This tag is made to automatically wrap several Classes inside one another
     # This is to reduce strain on the render pipeline and memory from nested classes
-    # SwapText is not included in this due to it replacing whole sections rather than
-    # individual letters. Would be better to embed an Omega inside a SwapText.
-    # MoveText as been omitted as well due to the others applying various transforms
-    # Would be better to have an event call attached to one of those so it keep track
-    # of the position more easily.
+    # Notes:
+      # GradientText and GlitchText are omitted because they were made after the 1.0 release.
+      # SwapText and MoveText are omitted for possible issues.
+      # SwapText because is not included in this due to it replacing whole sections rather than
+      # individual letters. Would be better to embed an Omega inside a SwapText.
+      # MoveText because of potential issues of having things like BounceText affect
+      # affecting the position of the letter visually.
+      # Would be better to have an event call attached to one of those so it can account
+      # for the transformations of other tags
+    # Argument Notes (all tag args accept same arguments as original tag):
+      # BT: BounceText
+      # SC: ScareText
+      # FI: FadeInText
+      # ROT: RotateText
+      # CH: ChaosText
+    # All tag arguments are seperated by @.
+    # Example: {omega=BT=[bt_arg]@SC=[sc_arg]@FI=[fi_arg1]-[fi_arg2]@ROT=[rot_arg]@CH}Text{/omega}
     def omega_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "": # This tag must have arguments
@@ -943,7 +973,6 @@ init python:
         return new_list
 
     """
-
     # Template tag function to copy off of.
     def TEMPLATE_tag(tag, argument, contents):
         new_list = [ ]
@@ -976,199 +1005,3 @@ init python:
     config.self_closing_custom_text_tags["para"] = paragraph_tag
     # Template tag function
     #config.custom_text_tags[""] = _tag
-
-    ##### Made these ones just for fun. Leaving them in here just in case anyone wants
-    ##### to use them. Probably will not add them to the Omega tag or to DispTextStyle
-
-    # Determines what color to apply to a letter in the gradient and gradient2 tags
-    def color_gradient(color_1, color_2, range, index):
-        """
-        'color_1'
-            String representing a color in hex. Format being rrggbb. Considered the start of the gradient
-        'color_2'
-            Same as above. Considered the end of the gradient
-        'range'
-            The number elements in the gradient
-        'id'
-            The id into the gradient
-
-        returns a string representing the index into the gradient
-        """
-        rv = "#" # rv stands for return value
-        # Return early if at the ends
-        if index == 0:
-            return color_1
-        if range == index:
-            return color_2
-        # Helps with conversion from string to int through hex
-        def str_to_int(str):
-            return int("0x" + str, base=16)
-        # Decompose the strings into rgb parts
-        red_1 = str_to_int(color_1[1:3])
-        red_2 = str_to_int(color_2[1:3])
-        green_1 = str_to_int(color_1[3:5])
-        green_2 = str_to_int(color_2[3:5])
-        blue_1 = str_to_int(color_1[5:7])
-        blue_2 = str_to_int(color_2[5:7])
-
-        # Get value of color
-        red_f = red_1 + (index * (red_2 - red_1) / range)
-        green_f = green_1 + (index * (green_2 - green_1) / range)
-        blue_f = blue_1 + (index * (blue_2 - blue_1) / range)
-
-        # If a value is over 255, then you input something wrong
-        if red_f > 255 or green_f > 255 or blue_f > 255:
-            renpy.notify("ERROR IN COLOR_GRADIENT")
-        # Get the hex value of the rgb channels
-        hex_red = hex(red_f)   # Convert to a hex string
-        hex_red = hex_red[2:4] # Strip the leading "0x"
-        hex_green = hex(green_f)
-        hex_green = hex_green[2:4]
-        hex_blue = hex(blue_f)
-        hex_blue = hex_blue[2:4]
-        # Append a 0 to the string if we'd only get one character
-        if red_f < 16:
-            hex_red = "0" + hex_red
-        if green_f < 16:
-            hex_green = "0" + hex_green
-        if blue_f < 16:
-            hex_blue = "0" + hex_blue
-        rv = rv + hex_red + hex_green + hex_blue
-        return rv
-
-    # This tag applies a static gradient over text
-    def gradient_tag(tag, argument, contents):
-        new_list = [ ]
-        if argument == "":
-            return
-        else: # Note: all arguments must be supplied
-            col_1, _, col_2 = argument.partition('-')
-        # Get a count of all the letters we will be applying colors to
-        count = 0
-        for kind,text in contents:
-            if kind == renpy.TEXT_TEXT:
-                for char in text:
-                    if char == ' ':
-                        continue
-                    count += 1
-        count -= 1
-        my_index = 0
-        my_style = DispTextStyle()
-        for kind,text in contents:
-            if kind == renpy.TEXT_TEXT:
-                for char in text:
-                    if char == ' ':
-                        new_list.append((renpy.TEXT_TEXT, ' '))
-                        continue
-                    new_list.append((renpy.TEXT_TAG, "color=" + color_gradient(col_1, col_2, count, my_index)))
-                    new_list.append((renpy.TEXT_TEXT, char))
-                    new_list.append((renpy.TEXT_TAG, "/color"))
-                    my_index += 1
-            elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
-                    new_list.append((kind, text))
-            else:
-                new_list.append((kind,text))
-        return new_list
-
-    # A custom displayable that applies a gradient over a letter of text.
-    # Honestly didn't test this works with other text tags since was just for fun
-    class GradientText(renpy.Displayable):
-        def __init__(self, char, col_list, id, list_end, **kwargs):
-            """
-            col_list format
-                (color_1, color_2, end_id)
-            list_end should be the number of gradients in the list
-            """
-            super(GradientText, self).__init__(**kwargs)
-
-            self.char = char
-            self.child = Text(char)
-            self.col_list = col_list # Calling it grad_list for gradient might be more appropriate.
-            self.id = id
-            self.list_end = list_end
-            # Figure out which gradient we are in
-            for i, element in enumerate(col_list):
-                if self.id < element[2]:
-                    self.curr_grad = i
-                    break
-            # Determine the current range (for color_gradient func later)
-            if self.curr_grad is 0:
-                self.curr_range = self.col_list[0][2]
-            else:
-                self.curr_range = self.col_list[self.curr_grad][2] - self.col_list[self.curr_grad - 1][2]
-
-        def render(self, width, height, st, at):
-            my_style = DispTextStyle()
-            # Get the color to apply to the text
-            if self.curr_grad == 0:
-                my_style.add_tags("color=" + color_gradient(self.col_list[self.curr_grad][0], self.col_list[self.curr_grad][1], self.curr_range, self.id))
-            else: # color_gradient() expects id to be within the range given. So must reduce to that if exceeding it.
-                my_style.add_tags("color=" + color_gradient(self.col_list[self.curr_grad][0], self.col_list[self.curr_grad][1], self.curr_range, self.id - self.col_list[self.curr_grad - 1][2]))
-
-            # Usual retrieval and drawing of child render
-            self.child.set_text(my_style.apply_style(self.char))
-            child_render = renpy.render(self.child, width, height, st, at)
-            self.width, self.height = child_render.get_size()
-            render = renpy.Render(self.width, self.height)
-            render.subpixel_blit(child_render, (0, 0))
-            renpy.redraw(self, 0)
-
-            # Iterate id for next render
-            self.id += 1
-            # If we are at the end of the range update gradient
-            if self.id > self.col_list[self.curr_grad][2]:
-                self.curr_grad += 1
-                # If at the end of our color list, reset back to 0
-                if self.curr_grad == self.list_end:
-                    self.curr_grad = 0
-                    self.id = 0
-                    self.curr_range = self.col_list[0][2]
-                # Otherwise just update the range
-                else:
-                    self.curr_range = self.col_list[self.curr_grad][2] - self.col_list[self.curr_grad - 1][2]
-
-            return render
-
-        def visit(self):
-            return [ self.child ]
-
-    # This tag applies a gradient that smoothly rolls over the letters
-    def gradient2_tag(tag, argument, contents):
-        new_list = [ ]
-        if argument == "":
-            return
-        else: # Note: All arguments must be supplied
-            arg_num, _, argument = argument.partition('-') # Number of gradients to read
-        arg_num = int(arg_num)
-        # Get all arguments
-        col_list = []
-        for i in range(arg_num):
-            col_1, _, argument = argument.partition('-')   # Color 1
-            col_2, _, argument = argument.partition('-')   # Color 2
-            end_num, _, argument = argument.partition('-') # Last index of the gradient
-            col_list.append((col_1, col_2, int(end_num)))
-
-        my_index = 0
-        my_style = DispTextStyle()
-        for kind,text in contents:
-            if kind == renpy.TEXT_TEXT:
-                for char in text:
-                    if char == ' ':
-                        new_list.append((renpy.TEXT_TEXT, ' '))
-                        continue
-                    char_disp = GradientText(my_style.apply_style(char), col_list, my_index, arg_num)
-                    new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
-                    my_index += 1
-                    # Wrap around if reached the end of the gradient list.
-                    if my_index >= col_list[arg_num-1][2]:
-                        my_index = 0
-            elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
-                    new_list.append((kind, text))
-            else:
-                new_list.append((kind,text))
-        return new_list
-
-    config.custom_text_tags["gradient"] = gradient_tag
-    config.custom_text_tags["gradient2"] = gradient2_tag
