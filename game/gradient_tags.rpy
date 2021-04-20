@@ -44,47 +44,13 @@ init python:
     # id:    (int) The offset into the gradient's range
     # Return: String of interpolated hex color in rrggbb format
     def color_gradient(color_1, color_2, range, index):
-        rv = "#" # rv stands for return value
-        # Return early if at the ends
         if index == 0:
             return color_1
         if range == index:
             return color_2
-        # Helps with conversion from string to int through hex
-        def str_to_int(str):
-            return int("0x" + str, base=16)
-        # Decompose the strings into rgb parts
-        red_1 = str_to_int(color_1[1:3])
-        red_2 = str_to_int(color_2[1:3])
-        green_1 = str_to_int(color_1[3:5])
-        green_2 = str_to_int(color_2[3:5])
-        blue_1 = str_to_int(color_1[5:7])
-        blue_2 = str_to_int(color_2[5:7])
-
-        # Get value of color
-        red_f = red_1 + (index * (red_2 - red_1) / range)
-        green_f = green_1 + (index * (green_2 - green_1) / range)
-        blue_f = blue_1 + (index * (blue_2 - blue_1) / range)
-
-        # If a value is over 255, then you input something wrong
-        if red_f > 255 or green_f > 255 or blue_f > 255:
-            renpy.notify("ERROR IN COLOR_GRADIENT")
-        # Get the hex value of the rgb channels
-        hex_red = hex(red_f)   # Convert to a hex string
-        hex_red = hex_red[2:4] # Strip the leading "0x"
-        hex_green = hex(green_f)
-        hex_green = hex_green[2:4]
-        hex_blue = hex(blue_f)
-        hex_blue = hex_blue[2:4]
-        # Append a 0 to the string if we'd only get one character
-        if red_f < 16:
-            hex_red = "0" + hex_red
-        if green_f < 16:
-            hex_green = "0" + hex_green
-        if blue_f < 16:
-            hex_blue = "0" + hex_blue
-        rv = rv + hex_red + hex_green + hex_blue
-        return rv
+        start_col = Color(color_1)
+        end_col = Color(color_2)
+        return start_col.interpolate(end_col, index * 1.0/range).hexcode
 
     # Applies a static gradient over text
     # Note: Hex Color = A string giving a hexadecimal color, in the form "#rrggbb".
