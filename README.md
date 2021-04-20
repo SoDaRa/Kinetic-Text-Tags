@@ -37,4 +37,7 @@ This modification works by taking the letters within a string of text sent to th
 - The history screen will not by default apply any text tags. This can be used to have what is shown on the say screen be different on the history screen if you'd like. However, if you'd like to have some of your effects carry through, then you can either append the gui.history_allow_tags variable or change the line `$ what = renpy.filter_text_tags(h.what, allow=[gui.history_allow_tags, "your_tag_here"])`  in the history screen section of screens.rpy
 - It should be noted that because we are using the Text class within Renpy, it may be a bit bloated. You could likely save a lot on resources by defining a Letter class that has much of the same functionality as the Text class, but only has to worry about a single letter. If you are finding yourself having performance concerns, I would advise doing this.  I may also provide one here in the future for those interested. I'll update on here if/when it has been added.
 
+## Support
+This code will always be free. But if you'd like to support me you can consider buying it off itch here. https://wattson.itch.io/kinetic-text-tags
+
 For a more detailed account of how this was made or (other details I may have forgotten to include), you can read more about it in my post on the Lemma Soft Forums https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=60527
