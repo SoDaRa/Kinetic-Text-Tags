@@ -10,6 +10,7 @@
  http://opensource.org/licenses/mit-license.php
  Forum Post: https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=60527&sid=75b4eb1aa5212a33cbfe9b0354e5376b
  Github: https://github.com/SoDaRa/Kinetic-Text-Tags
+ itch.io: https://wattson.itch.io/kinetic-text-tags
 """
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
