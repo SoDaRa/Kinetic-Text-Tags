@@ -9,9 +9,7 @@ style es_style:
 define e = Character("Eileen")
 define es = Character("{swap=Eileen@Lienee@1.0}{=es_style}Eileen{/swap}")
 define eb = Character("{bt}Eileen{/bt}", what_outlines=[ (.5, "#aFbFAA") ], what_color="#aa0000")
-
-default playername = "Player"
-
+default playername = "player"
 label start:
 
     scene bg room
@@ -19,6 +17,18 @@ label start:
     show eileen happy
 
     e "Wanna see some new text effects I've been making?"
+    e "Here's one {atl=bounce}ATL based text tag in use.{/atl}"
+    e "Here's one using {atl=rotate_text~0.5, bounce_text~10}ATL to do the bounce effect.{/atl}"
+    e "Here's a rotate using {atl=0.1,rotate_text~0.8}ATL as a tag thingy.{/atl}"
+    e "Here's a {atl=0.3,drop_text~#~ 1.5, bounce_text~10}dripping text ATL example.{/atl}"
+    camera threeD_text:
+        perspective True
+    e_3d "Here's a {atl=-0.1, text_rotate_3d}3D ATL text effect.{/atl}"
+    "Here's a normal line with an override to {atl=-0.1, text_rotate_3d}allow for 3D Text.{/atl}" (show_layer="threeD_text")
+    camera threeD_text
+    e "Here's a fade in {atl=-#,#,fade_in_text~1.0}atl text tag along with another atl text tag{/atl}"
+    e "Here's some {explode}exploding text.{/explode} Just give it a sec."
+    e "Here's some {explodehalf=2-2.0}position exploding text{/explodehalf}."
     e "Here's a {glitch=1.1}{color=#0f0}{b}Glitch{/b}{/color} Tag{/glitch}"
     # I know these first couple are a bit of an eye sore but wanted to show here how to apply styles to the effects.
     # And how previous styling won't be applied through them...

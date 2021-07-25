@@ -8,9 +8,9 @@
  Really hope this can help the community create some really neat ways to spice
  up their dialogue!
  http://opensource.org/licenses/mit-license.php
- Forum Post: https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=60527&sid=75b4eb1aa5212a33cbfe9b0354e5376b
  Github: https://github.com/SoDaRa/Kinetic-Text-Tags
  itch.io: https://wattson.itch.io/kinetic-text-tags
+ Forum Post: https://lemmasoft.renai.us/forums/viewtopic.php?f=51&t=60527&sid=75b4eb1aa5212a33cbfe9b0354e5376b
 """
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -31,6 +31,14 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+### UPDATE ###
+# With the new ATL text tag, a handful of effects I've made have become redundant.
+# Namely the bounce (bt), fadein (fi) and rotation (rotat) effects.
+# However, I'll leave them in here for posterity and in case someone would like
+# to reuse some of the code for whatever purpose.
+# Plus the bounce and fadein may be faster to type for some. And I'd probably
+# break some code if I did. Though feel free to remove them if you find them
+# to be clutter.
 
 ##### Our preference to disable the chaos text #####
 default preferences.chaos_on = False  # You can change this to be gui.chaos_text or persistent.chaos_text if you'd prefer.
@@ -41,291 +49,78 @@ init python:
 
     # This will maintain what styles we want to apply and help us apply them
     class DispTextStyle():
+        # Notes:
+        #   - "" denotes a style tag. Since it's usually {=user_style} and we partition
+        #     it over the '=', it ends up being an empty string
+        #   - If you want to add your own tags to the list, I recommend adding them
+        #     before the ""
+        #   - Self-closing tags should not be added here and should be handled
+        #     in the text tag function.
+        custom_tags = ["omega", "bt", "fi", "sc", "rotat", "chaos", "move"]
+        accepted_tags = ["", "b", "s", "u", "i", "color", "alpha", "font",  "size", "outlinecolor", "plain"]
+        custom_cancel_tags = ["/" + tag for tag in custom_tags]
+        cancel_tags = ["/" + tag for tag in accepted_tags]
         def __init__(self):
-            self.alpha = None
-            self.font = None
-            self.size = None
-            self.bold = False
-            self.italic = False
-            self.underline = False
-            self.strikethrough = False
-            self.plain = False
-            self.color = None
-            self.user_style = None
-            self.outline_color = None
-            # Be sure to add your own tags here if you want to wrap them up in each other
-            # I advise assigning None if they take an argument and False if they don't
-            # Be careful of the order tags are applied. Any tag meant to manipulate text
-            # should be the innermost one.
-            self.bounce_tag = None
-            self.fade_in_tag = None
-            self.scare_tag = None
-            self.rotate_tag = None
-            self.chaos_tag = False
-            self.move_tag = False
-            self.omega_tag = None
-
-
+            self.tags = {}
 
         # For setting style properties. Returns false if it accepted none of the tags
         def add_tags(self, char):
-            tag, _, value = char.partition("=") # Stole this from Text(). Mostly just want to get the tag info
-            #Common Tags
-            if tag == "b":
-                self.bold = True
+            tag, _, value = char.partition("=") # Separate the tag and its info
+            # Add tag to dictionary if we accept it
+            if tag in self.accepted_tags or tag in self.custom_tags:
+                if value == "":
+                    self.tags[tag] = True
+                else:
+                    self.tags[tag] = value
                 return True
-            elif tag == "/b":
-                self.bold = False
+            # Remove mark tag as cleared if should no longer apply it
+            if tag in self.cancel_tags or tag in self.custom_cancel_tags:
+                tag = tag.replace("/", "")
+                self.tags.pop(tag)
                 return True
-
-            elif tag == "s":
-                self.strikethrough = True
-                return True
-            elif tag == "/s":
-                self.strikethrough = False
-                return True
-
-            elif tag == "u":
-                self.underline = True
-                return True
-            elif tag == "/u":
-                self.underline = False
-                return True
-
-            elif tag == "i":
-                self.italic = True
-                return True
-            elif tag == "/i":
-                self.italic = False
-                return True
-
-            #Be sure to copy the parameters for any tag that has arguments!!
-            elif tag == "color":
-                self.color = char
-                return True
-            elif tag == "/color":
-                self.color = None
-                return True
-
-            elif tag == "alpha":
-                self.alpha = char
-                return True
-            elif tag == "/alpha":
-                self.alpha = None
-                return True
-
-            elif tag == "font":
-                self.font = char
-                return True
-            elif tag == "/font":
-                self.font = None
-                return True
-
-            elif tag == "":
-                self.user_style = char
-                return True
-            elif tag == "/":
-                self.user_style = None
-                return True
-
-            elif tag == "size":
-                self.size = char
-                return True
-            elif tag == "/size":
-                self.size = None
-                return True
-
-            elif tag == "outlinecolor":
-                self.outline_color = char
-                return True
-            elif tag == "/outlinecolor":
-                self.outline_color = None
-                return True
-
-            elif tag == "plain":
-                self.plain = True
-                return True
-            elif tag == "/plain":
-                self.plain = False
-                return True
-
-            #Custom Tags
-            elif tag == "bt":
-                self.bounce_tag = char
-                return True
-            elif tag == "/bt":
-                self.bounce_tag = None
-                return True
-
-            elif tag == "fi":
-                self.fade_in_tag = char
-                return True
-            elif tag == "/fi":
-                self.fade_in_tag = None
-                return True
-
-            elif tag == "sc":
-                self.scare_tag = char
-                return True
-            elif tag == "/sc":
-                self.scare_tag = None
-                return True
-
-            elif tag == "rotat":
-                self.rotate_tag = char
-                return True
-            elif tag == "/rotat":
-                self.rotate_tag = None
-                return True
-
-            elif tag == "chaos":
-                self.chaos_tag = True
-                return True
-            elif tag == "/chaos":
-                self. chaos_tag = False
-                return True
-
-            elif tag == "move":
-                self.move_tag = True
-                return True
-            elif tag == "/move":
-                self.move_tag = False
-                return True
-
-            elif tag == "omega":
-                self.omega_tag = char
-                return True
-            elif tag == "/omega":
-                self.omega_tag = None
-                return True
-
             return False # If we got any other tag, tell the function to let it pass
 
         # Applies all style properties to the string
         def apply_style(self, char):
             new_string = ""
-            # I'd never advise having the omega tag alongside other custom tags
-            if self.omega_tag is not None:
-                new_string += "{" + self.omega_tag + "}"
-            if self.bounce_tag is not None:
-                new_string += "{" + self.bounce_tag + "}"
-            if self.fade_in_tag is not None:
-                new_string += "{" + self.fade_in_tag + "}"
-            if self.scare_tag is not None:
-                new_string += "{" + self.scare_tag + "}"
-            if self.rotate_tag is not None:
-                new_string += "{" + self.rotate_tag + "}"
-            if self.chaos_tag:
-                new_string += "{chaos}"
-            if self.move_tag:
-                new_string += "{move}"
-            # User styles should come before other tags
-            if self.user_style is not None:
-                new_string += "{" + self.user_style + "}"
-            if self.bold:
-                new_string += "{b}"
-            if self.strikethrough:
-                new_string += "{s}"
-            if self.underline:
-                new_string += "{u}"
-            if self.italic:
-                new_string += "{i}"
-            if self.color is not None:
-                new_string += "{" + self.color + "}"
-            if self.alpha is not None:
-                new_string += "{" + self.alpha + "}"
-            if self.font is not None:
-                new_string += "{" + self.font + "}"
-
-            if self.size is not None:
-                new_string += "{" + self.size + "}"
-            if self.outline_color is not None:
-                new_string += "{" + self.outline_color + "}"
-            if self.plain:
-                new_string += "{plain}"
-
+            # Go through and apply all the tags
+            new_string += self.start_tags()
+            # Add the character in the middle
             new_string += char
-
-            # You MUST end your custom tags in reverse order!! (Unless they're self-closing)
-            if self.move_tag:
-                new_string += "{/move}"
-            if self.chaos_tag:
-                new_string += "{/chaos}"
-            if self.rotate_tag is not None:
-                new_string += "{/" + self.rotate_tag + "}"
-            if self.scare_tag is not None:
-                new_string += "{/" + self.scare_tag + "}"
-            if self.fade_in_tag is not None:
-                new_string += "{/" + self.fade_in_tag + "}"
-            if self.bounce_tag is not None:
-                new_string += "{/" + self.bounce_tag + "}"
-
-            if self.omega_tag is not None:
-                new_string += "{/" + self.omega_tag + "}"
-
+            # Now close all the tags we opened
+            new_string += self.end_tags()
             return new_string
 
         # Spits out start tags. Primarily used for SwapText
         def start_tags(self):
             new_string = ""
-            if self.omega_tag is not None:
-                new_string += "{" + self.omega_tag + "}"
-            if self.bounce_tag is not None:
-                new_string += "{" + self.bounce_tag + "}"
-            if self.fade_in_tag is not None:
-                new_string += "{" + self.fade_in_tag + "}"
-            if self.scare_tag is not None:
-                new_string += "{" + self.scare_tag + "}"
-            if self.rotate_tag is not None:
-                new_string += "{" + self.rotate_tag + "}"
-            if self.chaos_tag:
-                new_string += "{chaos}"
-            if self.move_tag:
-                new_string += "{move}"
-
-            if self.user_style is not None:
-                new_string += "{" + self.user_style + "}"
-            if self.bold:
-                new_string += "{b}"
-            if self.strikethrough:
-                new_string += "{s}"
-            if self.underline:
-                new_string += "{u}"
-            if self.italic:
-                new_string += "{i}"
-            if self.color is not None:
-                new_string += "{" + self.color + "}"
-            if self.alpha is not None:
-                new_string += "{" + self.alpha + "}"
-            if self.font is not None:
-                new_string += "{" + self.font + "}"
-            if self.size is not None:
-                new_string += "{" + self.size + "}"
-            if self.outline_color is not None:
-                new_string += "{" + self.outline_color + "}"
-            if self.plain:
-                new_string += "{plain}"
-
+            # Go through the custom tags
+            for tag in self.custom_tags:
+                if tag in self.tags:
+                    if self.tags[tag] == True:
+                        new_string += "{" + tag + "}"
+                    else:
+                        new_string += "{" + tag + "=" +self.tags[tag] + "}"
+            # Go through the standard tags
+            for tag in self.accepted_tags:
+                if tag in self.tags:
+                    if self.tags[tag] == True:
+                        new_string += "{" + tag + "}"
+                    else:
+                        new_string += "{" + tag + "=" +self.tags[tag] + "}"
             return new_string
 
         # Spits out ending tags. Primarily used for SwapText
         def end_tags(self):
             new_string = ""
-            if self.move_tag:
-                new_string += "{/move}"
-            if self.chaos_tag:
-                new_string += "{/chaos}"
-            if self.rotate_tag is not None:
-                new_string += "{/" + self.rotate_tag + "}"
-            if self.scare_tag is not None:
-                new_string += "{/" + self.scare_tag + "}"
-            if self.fade_in_tag is not None:
-                new_string += "{/" + self.fade_in_tag + "}"
-            if self.bounce_tag is not None:
-                new_string += "{/" + self.bounce_tag + "}"
-            if self.omega_tag is not None:
-                new_string += "{/" + self.omega_tag + "}"
-
+            # The only tags we are required to end are any custom text tags.
+            # And should also end them in the reverse order they were applied.
+            reversed_cancels = [tag for tag in self.custom_cancel_tags]
+            reversed_cancels.reverse()
+            for tag in reversed_cancels:
+                temp = tag.replace("/", "")
+                if temp in self.tags:
+                    new_string += "{" + tag + "}"
             return new_string
 
 
@@ -715,7 +510,6 @@ init python:
     # offset: (int) Offset within the line. Needed to help time start of fade-in with other slow text characters.
     # time: (float) How long in seconds the animation lasts.
     # Example: {fi=[offset]-[time]}Text{/fi}
-    # TODO: Update so can specify arguments better without needing both.
     def fade_in_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "":
@@ -980,7 +774,7 @@ init python:
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
-         return new_list
+        return new_list
     """
 
     # Define our new text tags
