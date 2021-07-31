@@ -105,7 +105,7 @@ transform drop_text(letter, time):
 transform fade_in_text(time=0.5, distance=20):
     alpha 0 xoffset distance
     ease time alpha 1 xoffset 0
-default my_value = None
+
 # Doing the following will help with using 3D stage transforms on say screen text
   # Defining the new layer below the screens layer to allow it to go behind anything on the screens layer
 define config.layers = [ 'master', 'transient', 'threeD_text', 'screens', 'overlay' ]
