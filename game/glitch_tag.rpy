@@ -83,7 +83,12 @@ init python:
                 char_disp = GlitchText(my_style.apply_style(text), argument)
                 new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
             elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = GlitchText(my_img, argument)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
