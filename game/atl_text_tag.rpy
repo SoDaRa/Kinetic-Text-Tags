@@ -108,9 +108,9 @@ transform fade_in_text(time=0.5, distance=20):
 
 # Doing the following will help with using 3D stage transforms on say screen text
   # Defining the new layer below the screens layer to allow it to go behind anything on the screens layer
-define config.layers = [ 'master', 'transient', 'threeD_text', 'screens', 'overlay' ]
+# define config.layers = [ 'master', 'transient', 'threeD_text', 'screens', 'overlay' ]
   # Tell the character to use our new layer to display the screen.
-define e_3d = Character("Eileen3D", show_layer="threeD_text")
+# define e_3d = Character("Eileen3D", show_layer="threeD_text")
   # And before using the character, be sure to do:
   # camera threeD_text:
   #     perspective True

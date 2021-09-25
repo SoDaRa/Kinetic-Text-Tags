@@ -174,14 +174,14 @@ init python:
     # May want to modify to allow it to skip to the end if the user clicks.
     # Otherwise plays for the full time given.
     class FadeInText(renpy.Displayable):
-        def __init__(self, child, char_num, fade_time, **kwargs):
+        def __init__(self, child, char_num, fade_time, slide_distance=100, **kwargs):
             super(FadeInText, self).__init__(**kwargs)
 
             # The child.
             self.child = child
             self.fade_time = fade_time
             self.display_time = .01
-            self.slide_distance = 100
+            self.slide_distance = slide_distance
             # This is to get seconds per character on screen for later
             # Allowing this effect to scale with the player's desired text speed
             cps = 0.0
@@ -492,8 +492,13 @@ init python:
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))     # Add it back in as a displayable
                     char_offset += 1
             elif kind == renpy.TEXT_TAG:
-                # Filter for every kind of tag we accept
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = BounceText(my_img, char_offset, argument)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                    char_offset += 1
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             # I honestly never got around to testing this. Not often the text
             # already has a displayable in it. Let me know if it breaks though.
@@ -509,16 +514,20 @@ init python:
     # Letters will start off to the right & invisible. And will then move left while increasing their opacity. Good for meditation and calm text.
     # offset: (int) Offset within the line. Needed to help time start of fade-in with other slow text characters.
     # time: (float) How long in seconds the animation lasts.
-    # Example: {fi=[offset]-[time]}Text{/fi}
+    # distance: (int) How many pixels the fade in occurs across
+    # Example: {fi=[offset]-[time]-[distance]}Text{/fi}
     def fade_in_tag(tag, argument, contents):
         new_list = [ ]
         if argument == "":
             my_index = 0
             fade_time = 5.0
+            slide_distance = 100
         else: # Note: if you include one argument, you should include both
-            my_index_str, _, fade_time_str = argument.partition('-')
-            my_index = int(my_index_str)
-            fade_time = float(fade_time_str)
+            my_index, _, argument = argument.partition('-')
+            my_index = int(my_index)
+            fade_time, _, slide_distance = argument.partition('-')
+            fade_time = float(fade_time)
+            slide_distance = int(slide_distance)
         my_style = DispTextStyle()
         for kind,text in contents:
             if kind == renpy.TEXT_TEXT:
@@ -527,11 +536,17 @@ init python:
                         new_list.append((renpy.TEXT_TEXT, ' ')) # Skips blank space since looks weird counting it
                         continue
                     char_text = Text(my_style.apply_style(char))
-                    char_disp = FadeInText(char_text, my_index, fade_time)
+                    char_disp = FadeInText(char_text, my_index, fade_time, slide_distance)
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
                     my_index += 1
             elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = FadeInText(my_img, my_index, fade_time, slide_distance)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                    my_index += 1
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
@@ -553,7 +568,12 @@ init python:
                     char_disp = ScareText(char_text, argument)
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
             elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = ScareText(my_img, argument)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
@@ -598,7 +618,12 @@ init python:
                     char_disp = RotateText(char_text, argument)
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
             elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = RotateText(my_img, argument)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
@@ -649,7 +674,12 @@ init python:
                     char_disp = MoveText(char_text)
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
             elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = MoveText(my_img)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))

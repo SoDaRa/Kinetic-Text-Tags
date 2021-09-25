@@ -9,6 +9,7 @@ style es_style:
 define e = Character("Eileen")
 define es = Character("{swap=Eileen@Lienee@1.0}{=es_style}Eileen{/swap}")
 define eb = Character("{bt}Eileen{/bt}", what_outlines=[ (.5, "#aFbFAA") ], what_color="#aa0000")
+define e_3d = Character("Eileen3D", show_layer="threeD_text")
 default playername = "player"
 label start:
 

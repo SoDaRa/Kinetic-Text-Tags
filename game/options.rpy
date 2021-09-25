@@ -14,7 +14,7 @@
 
 define config.name = _("Kinetic Text Tags")
 
-
+define config.layers = [ 'master', 'transient', 'threeD_text', 'screens', 'overlay' ]
 ## Determines if the title given above is shown on the main menu screen. Set
 ## this to False to hide the title.
 
