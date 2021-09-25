@@ -84,7 +84,12 @@ init python:
                     char_disp = ExplodeText(char_text, argument)
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
             elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = ExplodeText(my_img, argument)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
@@ -108,6 +113,9 @@ init python:
         for kind,text in contents:
             if kind == renpy.TEXT_TEXT:
                 total_length += len(text)
+            elif kind == renpy.TEXT_TAG:
+                if text.find("image") != -1:
+                    curr_id += 1
         curr_id = 0
         if center_arg == -1:
             center_arg = total_length / 2
@@ -119,7 +127,13 @@ init python:
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
                     curr_id += 1
             elif kind == renpy.TEXT_TAG:
-                if not my_style.add_tags(text):
+                if text.find("image") != -1:
+                    tag, _, value = text.partition("=")
+                    my_img = renpy.displayable(value)
+                    img_disp = ExplodeHalfText(my_img, total_length, curr_id, center_arg, time_arg)
+                    new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
+                    curr_id += 1
+                elif not my_style.add_tags(text):
                     new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
