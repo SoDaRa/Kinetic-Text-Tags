@@ -198,7 +198,7 @@ init python:
     #   transform_name: (string) The name of a defined transform.
     #                            Will throw an error if doesn't exist
     #   param: (float/string/'#') A parameter for the transform. Must be ordered by position.
-    #     All numbers will be interpreted as floats. Strings should evaluate to a displayable OR
+    #     All numbers will be interpreted as floats. Strings should evaluate to a displayable, a global variable OR
     #     optionally, can be left as '#' in order to use the current character as a displayable parameter.
     #     (No current support for keyword args)
     # Notes:
@@ -281,8 +281,11 @@ init python:
                             param = float(txt_param_list[i])
                         except ValueError:
                             param = None
-                        # Attempt a displayable. Allow the exception so user knows they screwed up.
-                        if param == None:
+                        # Attempt a global variable
+                        if param == None and txt_param_list[i] in globals():
+                            param = globals()[txt_param_list[i]]
+                        # Attempt a displayable
+                        elif param == None:
                             param = renpy.displayable(txt_param_list[i])
                         param_list.append(param)
                     return_list.append(globals()[arg](*param_list))
