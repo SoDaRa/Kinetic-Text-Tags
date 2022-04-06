@@ -57,7 +57,7 @@ init python:
         #   - Self-closing tags should not be added here and should be handled
         #     in the text tag function.
         custom_tags = ["omega", "bt", "fi", "sc", "rotat", "chaos", "move"]
-        accepted_tags = ["", "b", "s", "u", "i", "color", "alpha", "font",  "size", "outlinecolor", "plain"]
+        accepted_tags = ["", "b", "s", "u", "i", "color", "alpha", "font",  "size", "outlinecolor", "plain", 'cps']
         custom_cancel_tags = ["/" + tag for tag in custom_tags]
         cancel_tags = ["/" + tag for tag in accepted_tags]
         def __init__(self):
@@ -127,7 +127,7 @@ init python:
     ### TEXT WRAPPER CLASSES ###
     # Basic text displacement demonstration
     class BounceText(renpy.Displayable):
-        def __init__(self, child, char_offset, bounce_height=20, **kwargs):
+        def __init__(self, child, char_offset, amp=20, period=4.0, speed = 1.0, **kwargs):
 
             # Pass additional properties on to the renpy.Displayable
             # constructor.
@@ -137,16 +137,16 @@ init python:
             # of class Text. If you might not, I recommend going with the default of
             # self.child = renpy.displayable(child)
             self.child = child
-
-            self.bounce_height = bounce_height # The amplitude of the sine wave
+            self.amp = amp # The amplitude of the sine wave
             self.char_offset = char_offset # The offset into the sine wave
-            self.freq = 4.0 # How fast the text moves up and down
+            self.period = period # Affects the distance between peaks in the wave.
+            self.speed = speed   # Affects how fast our wave moves as a function of time.
 
         def render(self, width, height, st, at):
             # Where the current offset is calculated
             # (self.char_offset * -.1) makes it look like the left side is leading
             # We use st to allow this to change over time
-            curr_height = math.sin(self.freq*(st+(float(self.char_offset) * -.1))) * float(self.bounce_height)
+            curr_height = math.sin(self.period*((st * self.speed)+(float(self.char_offset) * -.1))) * float(self.amp)
 
             ####  A Transform can be used for several effects   ####
             # t = Transform(child=self.child,  alpha = curr_height)
@@ -474,12 +474,33 @@ init python:
 
     ### CUSTOM TAG FUNCTIONS ###
     # Letters move in a sine wave.
-    # height: (int) The amplitude of the text's sine wave motion. How high and low it'll go from it's default position in pixels. Good for jubilent and floaty text.
+    # Arguments are separated by dashes.
+    # Arguments:
+    # 'a': (int) The amplitude (height) of the text's sine wave motion. How high and low it'll go from it's default position in pixels.
+    # 'p': (float) The period of the wave. Distance between peaks in the wave.
+    # 's': (float) The speed of the wave. How fast it moves with time.
     # Example: {bt=[height]}Text{/bt}
+    # Example: {bt=h5-p2.0-s0.5}Text{/bt}
+    # If a lone number is given, it is treated as the amplitude only to ensure backwards compatibility
+    # Example: {bt=10}Text{/bt}
     def bounce_tag(tag, argument, contents):
         new_list = [ ] # The list we will be appending our displayables into
+        amp, period, speed = 20, 4.0, 1.0
         if argument == "": # If the argument received is blank, insert a default value
-            argument = 10
+            amp = 20
+        else:
+            argument = argument.split('-')
+            if len(argument) == 1 and argument[0][0].isdigit(): # Default behavior to ensure backward compatibility
+                amp = int(argument[0])
+            else:
+                for arg in argument:
+                    if arg[0] == 'a':
+                        amp = int(arg[1:])
+                    elif arg[0] == 'p':
+                        period = float(arg[1:])
+                    elif arg[0] == 's':
+                        speed = float(arg[1:])
+
         char_offset = 0  # Since we want our text to move in a wave,
                          # we want to let each character know where it is in the wave.
                          # So they move in harmony. Otherwise they rise and fall all together.
@@ -488,14 +509,14 @@ init python:
             if kind == renpy.TEXT_TEXT:
                 for char in text:                                            # Extract every character from the string
                     char_text = Text(my_style.apply_style(char))             # Create a Text displayable with our styles applied
-                    char_disp = BounceText(char_text, char_offset, argument) # Put the Text into the Wrapper
+                    char_disp = BounceText(char_text, char_offset, amp=amp, period=period, speed=speed) # Put the Text into the Wrapper
                     new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))     # Add it back in as a displayable
                     char_offset += 1
             elif kind == renpy.TEXT_TAG:
                 if text.find("image") != -1:
                     tag, _, value = text.partition("=")
                     my_img = renpy.displayable(value)
-                    img_disp = BounceText(my_img, char_offset, argument)
+                    img_disp = BounceText(my_img, char_offset, amp=amp, period=period, speed=speed)
                     new_list.append((renpy.TEXT_DISPLAYABLE, img_disp))
                     char_offset += 1
                 elif not my_style.add_tags(text):
@@ -503,7 +524,7 @@ init python:
             # I honestly never got around to testing this. Not often the text
             # already has a displayable in it. Let me know if it breaks though.
             elif kind == renpy.TEXT_DISPLAYABLE:
-                char_disp = BounceText(text, char_offset, argument)
+                char_disp = BounceText(text, char_offset, amp=amp, period=period, speed=speed)
                 new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
                 char_offset += 1
             else: # Don't touch any other type of content
@@ -518,16 +539,15 @@ init python:
     # Example: {fi=[offset]-[time]-[distance]}Text{/fi}
     def fade_in_tag(tag, argument, contents):
         new_list = [ ]
-        if argument == "":
-            my_index = 0
-            fade_time = 5.0
-            slide_distance = 100
-        else: # Note: if you include one argument, you should include both
-            my_index, _, argument = argument.partition('-')
-            my_index = int(my_index)
-            fade_time, _, slide_distance = argument.partition('-')
-            fade_time = float(fade_time)
-            slide_distance = int(slide_distance)
+        my_index, fade_time, slide_distance = 0, 5.0, 100
+        if argument != "":
+            argument = argument.split('-')
+            if len(argument) > 0:
+                my_index = int(argument[0])
+            if len(argument) > 1:
+                fade_time = float(argument[1])
+            if len(argument) > 2:
+                slide_distance = int(argument[2])
         my_style = DispTextStyle()
         for kind,text in contents:
             if kind == renpy.TEXT_TEXT:
