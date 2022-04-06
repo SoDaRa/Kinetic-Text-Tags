@@ -345,8 +345,6 @@ init python:
                         new_list.append((kind, text))
             else:
                 new_list.append((kind,text))
-        global my_value
-        my_value = char_index * time_offset
         return new_list
 
     config.custom_text_tags["atl"] = atl_tag
