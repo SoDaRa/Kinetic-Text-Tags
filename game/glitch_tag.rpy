@@ -82,6 +82,9 @@ init python:
             if kind == renpy.TEXT_TEXT:
                 char_disp = GlitchText(my_style.apply_style(text), argument)
                 new_list.append((renpy.TEXT_DISPLAYABLE, char_disp))
+                new_list.append((renpy.TEXT_TAG, "alt"))
+                new_list.append((renpy.TEXT_TEXT, text))
+                new_list.append((renpy.TEXT_TAG, "/alt"))
             elif kind == renpy.TEXT_TAG:
                 if text.find("image") != -1:
                     tag, _, value = text.partition("=")
