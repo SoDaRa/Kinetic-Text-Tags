@@ -33,7 +33,7 @@
 
 
 init python:
-    class GlitchText(renpy.Displayable):
+    class GlitchText(renpy.Displayable,str):
         def __init__(self, child, amount, **kwargs):
             super(GlitchText, self).__init__(**kwargs)
             if isinstance(child, (str, unicode)):
@@ -41,6 +41,10 @@ init python:
             else:
                 self.child = child
             self.amount = amount
+
+        def __new__(cls, child, amount, **kwargs):
+            if isinstance(child, (str, unicode)):
+                return str.__new__(cls, child)
 
         def render(self, width, height, st, at):
             child_render = renpy.render(self.child, width, height, st, at)
